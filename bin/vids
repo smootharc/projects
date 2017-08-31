@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+usage () 
+{
+
+        echo "Usage: vids OneValidDirectoryName"
+        exit 1
+
+}
+
+if [[ "$#" -gt 1 ]]; then
+        usage
+fi
+
+if ! test -d "$1"; then
+        usage
+else
+        dirname=$(realpath "$1")
+fi
+
+playlist="$(mktemp)"
+#eval "find -type f $dirname -regextype posix-extended -iregex '.*("$(videoextensions)")$'"
+#regex=$(videoextensions)
+#find="find $directory -regextype posix-extended -iregex '.*("$regex")'"
+
+find "$dirname" -type f -printf '%C+\t%p\n' | sort -n | cut -f 2 | file -if - | grep video/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
+#realpath "$@" | file -if - | grep video | cut -d: -f 1 | sort > "$playlist"
+
+if [[ -s "$playlist" ]]; then
+
+    mpv --fs --playlist="$playlist"
+
+else
+
+    echo "No videos found!"
+
+fi
+
+[[ -f "$playlist" ]] && rm "$playlist"

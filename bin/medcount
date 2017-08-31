@@ -1,0 +1,46 @@
+#!/usr/bin/env fish
+
+function usage
+
+    echo \n$argv\n 
+    echo Usage: (basename (status -f)) startdate enddate medication \n
+    exit
+
+end 
+
+if test (count $argv) -ne 3
+    usage "Missing arguments."
+end
+
+set -l start (date +%s -d $argv[1] ^ /dev/null) 
+
+if not test $status -eq 0
+    usage "Bad Start Date."
+end
+
+set -l end (date +%s -d $argv[2] ^ /dev/null)
+
+if not test $status -eq 0
+    usage "Bad End Date."
+end
+
+
+set -l elapsed (math $end - $start)
+set doses (gcalcli --tsv --calendar Medical agenda $argv[1] $argv[2] | grep -v 00:00 | grep $argv[3] | wc -l)
+
+if test $doses -eq 0
+    usage "Medication not found."
+end
+
+#set days (echo "scale=2;$elapsed/86400" | bc -l)
+set -l days (math "scale=2;$elapsed/86400")
+set -l dosesperday (math "scale=2;$doses/$days")
+#set dosesperday (echo "scale=2;$doses/$days" | bc -l)
+echo
+echo "Medication: $argv[3]"
+echo "      From: "(date +"%Y-%m-%d %H:%M" -d $argv[1])
+echo "        To: "(date +"%Y-%m-%d %H:%M" -d $argv[2])
+echo "      Days: $days"
+echo "     Doses: $doses" 
+echo " Doses/Day: $dosesperday"
+echo

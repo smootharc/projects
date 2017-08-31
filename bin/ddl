@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+if numfmt -- "$1" &> /dev/null; then
+        #shopt -s dotglob
+        #find ~/Downloads/* -cmin +"$thetime" -delete 2>/dev/null
+        find /home/paul/Downloads -type f -cmin +"$1" -delete
+        find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
+        #shopt -u dotglob
+else
+        echo "No time specified.  Nothing deleted."			
+fi
