@@ -21,6 +21,7 @@ export CDPATH=.:~:~/.config
 alias pics='feh -rqdF'
 alias pan='pan &> /dev/null &'
 alias weather='curl wttr.in/08096'
+alias byobu='uxterm -maximize -e byobu &'
 #alias meds='gcalcli --calendar Medical'
 
 ddl () 

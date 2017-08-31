@@ -39,7 +39,7 @@ URxvt*scrollBar_right: true
 
 XTerm*renderFont: true
 XTerm*faceName: DejaVu Sans Mono
-XTerm*faceSize: 10
+XTerm*faceSize: 13
 
 UXTerm*renderFont: true
 UXTerm*faceName: DejaVu Sans Mono
