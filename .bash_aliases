@@ -28,7 +28,7 @@ ddl ()
 {
         if numfmt -- "$1" &> /dev/null; then
 
-                find /home/paul/Downloads -type f -cmin +"$1" -delete
+                find /home/paul/Downloads -type f -mmin +"$1" -delete
                 find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
 
         else
