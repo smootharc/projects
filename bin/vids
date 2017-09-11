@@ -23,7 +23,8 @@ playlist="$(mktemp)"
 #regex=$(videoextensions)
 #find="find $directory -regextype posix-extended -iregex '.*("$regex")'"
 
-find "$dirname" -type f -printf '%C+\t%p\n' | sort -n | cut -f 2 | file -if - | grep video/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
+#find "$dirname" -type f -printf '%C+\t%p\n' | sort -n | cut -f 2 | file -if - | grep video/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
+find "$dirname" -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep video/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
 #realpath "$@" | file -if - | grep video | cut -d: -f 1 | sort > "$playlist"
 
 if [[ -s "$playlist" ]]; then

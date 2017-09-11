@@ -26,35 +26,37 @@ alias weather='curl wttr.in/08096'
 
 ddl () 
 {
-        if numfmt -- "$1" &> /dev/null; then
+    if numfmt -- "$1" &> /dev/null; then
 
-                find /home/paul/Downloads -type f -mmin +"$1" -delete
-                find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
+            find /home/paul/Downloads -type f -cmin +"$1" -delete
+            find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
 
-        else
+    else
 
-                echo "No or non-numeric time specified.  Nothing deleted."
+            echo "No or non-numeric time specified.  Nothing deleted."
 
-        fi
+    fi
 }
 
 videoextensions ()
 {
-        awk '/video/ && $2 != "" { $1=""; gsub(/^ /,"",$0);gsub(" ","|");output = output $0 "|"} END {print substr(output,1,length(output) -1) }' /etc/mime.types
+    awk '/video/ && $2 != "" { $1=""; gsub(/^ /,"",$0);gsub(" ","|");output = output $0 "|"} END {print substr(output,1,length(output) -1) }' /etc/mime.types
 }
 
 vdl ()
 {
-        if ! feh -rqdFnSmtime ~/Downloads &> /dev/null; then
-                echo "No images found!"
-        fi
-        vids ~/Downloads
-        ddl $1
+    #feh -Ff <(find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1)
+    #if ! feh -rqdFnSmtime ~/Downloads &> /dev/null; then
+    if ! feh --keep-zoom-vp -ZFf <(find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1) &> /dev/null; then
+            echo "No images found!"
+    fi
+    vids ~/Downloads
+    ddl $1
 }
 
 = ()
 {
-        bc -l <<< "$@"
+    bc -l <<< "$@"
 }
 
 now ()
