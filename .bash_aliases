@@ -10,6 +10,7 @@ PATH=~/.local/bin:$PATH
 export BROWSER=google-chrome-stable
 export INFO_PRINT_COMMAND="a2ps -s 2"
 export EDITOR=vim
+export VISUAL=gvim
 export HISTSIZE=
 export HISTFILESIZE=
 export HISTCONTROL=erasedups:ignoreboth
@@ -24,20 +25,6 @@ alias weather='curl wttr.in/08096'
 #alias byobu='uxterm -maximize -e byobu &'
 #alias meds='gcalcli --calendar Medical'
 
-ddl () 
-{
-    if numfmt -- "$1" &> /dev/null; then
-
-            find /home/paul/Downloads -type f -cmin +"$1" -delete
-            find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
-
-    else
-
-            echo "No or non-numeric time specified.  Nothing deleted."
-
-    fi
-}
-
 videoextensions ()
 {
     awk '/video/ && $2 != "" { $1=""; gsub(/^ /,"",$0);gsub(" ","|");output = output $0 "|"} END {print substr(output,1,length(output) -1) }' /etc/mime.types
@@ -47,9 +34,12 @@ vdl ()
 {
     #feh -Ff <(find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1)
     #if ! feh -rqdFnSmtime ~/Downloads &> /dev/null; then
-    if ! feh --keep-zoom-vp -ZFf <(find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1) &> /dev/null; then
+    playlist="$(mktemp)"
+    find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
+    if ! feh -dqF -f "$playlist" 2> /dev/null; then
             echo "No images found!"
     fi
+    [[ -f "$playlist" ]] && rm "$playlist"
     vids ~/Downloads
     ddl $1
 }
