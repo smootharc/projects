@@ -23,6 +23,7 @@ alias pics='feh -rqdF'
 alias pan='pan &> /dev/null &'
 alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
+alias mana='man -a'
 
 videoextensions ()
 {
