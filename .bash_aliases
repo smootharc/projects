@@ -10,7 +10,7 @@ PATH=~/.local/bin:$PATH
 export BROWSER=google-chrome-stable
 export INFO_PRINT_COMMAND="a2ps -s 2"
 export EDITOR=vim
-export VISUAL=gvim
+export VISUAL=vim
 export HISTSIZE=
 export HISTFILESIZE=
 export HISTCONTROL=erasedups:ignoreboth
@@ -22,8 +22,7 @@ export CDPATH=.:~:~/.config
 alias pics='feh -rqdF'
 alias pan='pan &> /dev/null &'
 alias weather='curl wttr.in/08096'
-#alias byobu='uxterm -maximize -e byobu &'
-#alias meds='gcalcli --calendar Medical'
+alias meds='gcalcli --calendar Medical'
 
 videoextensions ()
 {

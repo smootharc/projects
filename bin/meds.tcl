@@ -24,22 +24,9 @@ proc count {startdate enddate} {
     puts "Count $startdate $enddate"
 }
 
-catch {cmdline::getopt argv "add count agenda" opt val} returnval
-
-puts "Return from catch: $returnval"
-puts "Option: $opt Value: $val"
-puts "Length of argv: [llength $argv] Value of argv: $argv"
-after 5000
-
-set startdate [lindex $argv 0]
-set enddate [lindex $argv 1]
-
-switch $opt {
-    add { add $argv }
-    count { count $startdate $enddate }
-    agenda { agenda $startdate $enddate }
-    default { usage }
+set options {
+    {add  "comment for option a"}
+    {edit  "comment for option e"}
 }
 
-
-
+puts [cmdline::getKnownOptions argv $options]
