@@ -1,46 +1,57 @@
-#!/usr/bin/env fish
+#!/usr/bin/env tclsh
 
-function usage
-
-    echo \n$argv\n 
-    echo Usage: (basename (status -f)) startdate enddate medication \n
+proc usage { message } {
+    puts $message
     exit
+}
 
-end 
+if { $argc eq 0 } { usage "\nMissing parameters!\n\nUsage: [file tail $argv0] medication ?startdate? ?enddate?\n" }
 
-if test (count $argv) -ne 3
-    usage "Missing arguments."
-end
+set medication [lindex $argv 0]
+set starttime [lindex $argv 1]
+set endtime [lindex $argv 2]
 
-set -l start (date +%s -d $argv[1] ^ /dev/null) 
+#set startseconds [clock scan $starttime]
+if { ![llength $starttime] } { set startseconds [clock scan "-30 days"] } else { set startseconds [clock scan $starttime] }
+    
+set endseconds [clock scan $endtime]
 
-if not test $status -eq 0
-    usage "Bad Start Date."
-end
+#puts "Start seconds: $startseconds End seconds: $endseconds"
+#after 1000
 
-set -l end (date +%s -d $argv[2] ^ /dev/null)
+set elapsedseconds [expr {$endseconds - $startseconds}]
 
-if not test $status -eq 0
-    usage "Bad End Date."
-end
+#puts $enddate
 
+set doses [split [exec gcalcli --tsv --calendar Medical search " "] "\n"]
 
-set -l elapsed (math $end - $start)
-set doses (gcalcli --tsv --calendar Medical agenda $argv[1] $argv[2] | grep -v 00:00 | grep $argv[3] | wc -l)
+set doses [lsearch -all -inline -not $doses *00:00*]
 
-if test $doses -eq 0
-    usage "Medication not found."
-end
+set doses [lsearch -all -inline -nocase $doses *$medication*]
 
-#set days (echo "scale=2;$elapsed/86400" | bc -l)
-set -l days (math "scale=2;$elapsed/86400")
-set -l dosesperday (math "scale=2;$doses/$days")
-#set dosesperday (echo "scale=2;$doses/$days" | bc -l)
-echo
-echo "Medication: $argv[3]"
-echo "      From: "(date +"%Y-%m-%d %H:%M" -d $argv[1])
-echo "        To: "(date +"%Y-%m-%d %H:%M" -d $argv[2])
-echo "      Days: $days"
-echo "     Doses: $doses" 
-echo " Doses/Day: $dosesperday"
-echo
+#foreach dose $doses { puts $dose }
+
+set dosecount 0
+
+foreach dose $doses { 
+    
+    set doseseconds [clock scan [concat [lindex $dose 0] [lindex $dose 1]]]
+    if { [expr { $startseconds < $doseseconds && $endseconds > $doseseconds }] } {
+        incr dosecount
+#        puts $dosecount
+}
+
+}
+
+set doses [llength $doses]
+
+set days [expr { $elapsedseconds / 86400.00 }]
+
+puts ""
+puts "Medication: $medication"
+puts "      From: [clock format $startseconds -format "%Y-%m-%d %H:%M:%S"]"
+puts "        To: [clock format $endseconds -format "%Y-%m-%d %H:%M:%S"]"
+puts "     Doses: [format %.2f $dosecount]"
+puts "      Days: [format %.2f $days]"
+puts " Doses/Day: [format %.2f [expr { $dosecount / $days }]]"
+puts ""
