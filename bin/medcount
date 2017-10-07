@@ -1,23 +1,34 @@
 #!/usr/bin/env tclsh
 
 proc usage { message } {
-    puts $message
-    exit
+
+    global argv0
+    puts "\n$message\n"
+    puts "Usage: [file tail $argv0] medication ?startdate? ?enddate?\n"
+    exit 1
+
 }
 
-if { $argc eq 0 } { usage "\nMissing parameters!\n\nUsage: [file tail $argv0] medication ?startdate? ?enddate?\n" }
+if { $argc eq 0 } { usage "Missing parameters! }
 
 set medication [lindex $argv 0]
 set starttime [lindex $argv 1]
 set endtime [lindex $argv 2]
 
 #set startseconds [clock scan $starttime]
-if { ![llength $starttime] } { set startseconds [clock scan "-30 days"] } else { set startseconds [clock scan $starttime] }
+if { ![llength $starttime] } { set startseconds [clock scan "-30 days"] } else { catch { set startseconds [clock scan $starttime] } catchresult }
+
+if { ![info exists startseconds]  } { usage "$catchresult" }
     
-set endseconds [clock scan $endtime]
+catch { set endseconds [clock scan $endtime] } catchresult
+
+if { ![info exists endseconds] } { usage $catchresult }
 
 #puts "Start seconds: $startseconds End seconds: $endseconds"
 #after 1000
+
+if { $startseconds > $endseconds } { usage "Startime must be earlier than end time." }
+
 
 set elapsedseconds [expr {$endseconds - $startseconds}]
 
