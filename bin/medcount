@@ -3,6 +3,7 @@
 proc usage { message } {
 
     global argv0
+    set message [string toupper $message 0 0]
     puts "\n$message\n"
     puts "Usage: [file tail $argv0] medication ?startdate? ?enddate?\n"
     exit 1
