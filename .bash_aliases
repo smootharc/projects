@@ -26,25 +26,6 @@ alias meds='gcalcli --calendar Medical'
 alias mana='man -a'
 alias mank='man -k'
 
-videoextensions ()
-{
-    awk '/video/ && $2 != "" { $1=""; gsub(/^ /,"",$0);gsub(" ","|");output = output $0 "|"} END {print substr(output,1,length(output) -1) }' /etc/mime.types
-}
-
-vdl ()
-{
-    #feh -Ff <(find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1)
-    #if ! feh -rqdFnSmtime ~/Downloads &> /dev/null; then
-    playlist="$(mktemp)"
-    find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
-    if ! feh -dqF -f "$playlist" 2> /dev/null; then
-            echo "No images found!"
-    fi
-    [[ -f "$playlist" ]] && rm "$playlist"
-    vids ~/Downloads
-    ddl $1
-}
-
 = ()
 {
     bc -l <<< "$@"

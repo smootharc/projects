@@ -1,6 +1,9 @@
-#!/usr/bin/awk -f
+#!/bin/bash
 
-function dt2s( date, time)
+
+gcalcli --tsv --calendar Medical search " " | awk -v medication="$1" -v starttime="$2" -v endtime="$3" '
+
+function date2s( date, time)
 {
     gsub(/-/, " ", date)
     gsub(/:/, " ", time)
@@ -11,10 +14,13 @@ BEGIN {
 
 print "Arg Count: " ARGC
 print "Arg Zero: " ARGV[0]
-print Medication
+print medication
+print starttime
+print endtime
+
 }
 
-$0 ~ Medication && !/00:00/ {
+$0 ~ medication && !/00:00/ {
 
 doses++
 printf "%4d %s \n", doses, $0
@@ -28,8 +34,8 @@ END {
 
 
 endseconds = systime()
-#endseconds = mktime( dt2s( $1, $4 ) )
-startseconds = mktime( dt2s( startdate, starttime ) )
+#endseconds = mktime( date2s( $1, $4 ) )
+startseconds = mktime( date2s( startdate, starttime ) )
 elapsedseconds = endseconds - startseconds
 days = elapsedseconds / 86400
 dosesperday = doses / days
@@ -43,3 +49,4 @@ print " Elapsed Days: " days
 print "    Doses/Day: " dosesperday
 }
 
+'

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+awk -v type="$1" '$1 ~ type && $2 != "" { $1=""; gsub(/^ /,"",$0);gsub(" ","|");output = output $0 "|"} END {print substr(output,1,length(output) -1) }' /etc/mime.types
