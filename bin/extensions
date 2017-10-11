@@ -6,4 +6,20 @@ if test "$#" -ne 1; then
     exit 1
 fi
 
-awk -v type="$1" '$1 ~ type && $2 != "" { $1=""; gsub(/^ /,"",$0);gsub(" ","|");output = output $0 "|"} END {print substr(output,1,length(output) -1) }' /etc/mime.types
+awk -v type="$1" '
+    $1 ~ type && $2 != "" {
+
+        $1="" 
+        gsub(/^ /,"",$0)
+        gsub(" ","|")
+        output = output $0 "|"
+
+    } 
+
+    END {
+
+        if ( length(output) > 0 )
+    
+            print substr(output,1,length(output) -1)
+
+     }' /etc/mime.types
