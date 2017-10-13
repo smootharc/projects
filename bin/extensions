@@ -1,25 +1,10 @@
 #!/usr/bin/env bash
 
 if test "$#" -ne 1; then
-    progname=$(basename $0)
+
     printf "\nUsage: %s filetype\n\n" $(basename $0)
     exit 1
+
 fi
 
-awk -v type="$1" '
-    $1 ~ type && $2 != "" {
-
-        $1="" 
-        gsub(/^ /,"",$0)
-        gsub(" ","|")
-        output = output $0 "|"
-
-    } 
-
-    END {
-
-        if ( length(output) > 0 )
-    
-            print substr(output,1,length(output) -1)
-
-     }' /etc/mime.types
+grep "$1" /etc/mime.types | tr -s "\t" | cut -s -f 2 | tr " " "\n" | tr "\n" "|" | sed 's/|$//'
