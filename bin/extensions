@@ -7,4 +7,6 @@ if test "$#" -ne 1; then
 
 fi
 
+#awk -v search=video '$1 ~ search && NF > 1 { for ( i = 2; i <=  NF; i++ ) { output = output$i"|" } } END { printf "%s",  substr(output, 1, length(output) - 1) }' /etc/mime.types
+
 grep "$1" /etc/mime.types | tr -s "\t" | cut -s -f 2 | tr " " "\n" | tr "\n" "|" | sed 's/|$//'
