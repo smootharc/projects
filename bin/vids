@@ -25,7 +25,7 @@ playlist="$(mktemp)"
 
 #read
 #find "$dirname" -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep video/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
-find "$dirname" -regextype posix-extended -iregex ".*($(extensions video/))" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
+find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video/))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
 
 if [[ -s "$playlist" ]]; then
 

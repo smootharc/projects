@@ -5,7 +5,7 @@
 #echo VDL;read
 playlist="$(mktemp)"
 #find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
-find ~/Downloads -regextype posix-extended -iregex ".*($(extensions image/))" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
+find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions image/))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
 if ! feh -dqF -f "$playlist" 2> /dev/null; then
         echo "No images found!"
 fi
