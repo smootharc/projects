@@ -5,7 +5,7 @@ shopt -s cdspell
 shopt -s extglob
 shopt -s nocaseglob
 set -o vi
-set +H
+#set +H
 ulimit -s 65536
 PATH=~/.local/bin:$PATH
 export BROWSER=google-chrome-stable
