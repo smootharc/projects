@@ -37,10 +37,18 @@ URxvt*scrollTtyKeypress: true
 
 URxvt*scrollBar_right: true
 
+XTerm.background: black
+XTerm.foreground: white
 XTerm*renderFont: true
 XTerm*faceName: DejaVu Sans Mono
 XTerm*faceSize: 13
 
+UXTerm.background: black
+UXTerm.foreground: white
 UXTerm*renderFont: true
 UXTerm*faceName: DejaVu Sans Mono
 UXTerm*faceSize: 13
+UXTerm.vt100.selectToClipboard: true
+UXTerm*VT100.Translations: #override \
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD)

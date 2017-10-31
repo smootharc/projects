@@ -7,7 +7,6 @@ shopt -s nocaseglob
 set -o vi
 #set +H
 ulimit -s 65536
-PATH=~/.local/bin:$PATH
 export BROWSER=google-chrome-stable
 export INFO_PRINT_COMMAND="a2ps -s 2"
 export EDITOR=vim
@@ -26,7 +25,8 @@ alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
 alias mana='man -a'
 alias mank='man -k'
-
+alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
+stty -ixon
 = ()
 {
     bc -l <<< "$@"

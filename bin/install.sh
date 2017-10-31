@@ -7,7 +7,7 @@ apt update
 apt install \
 xfce4-goodies ranger mpv feh htop glances desktop-webmail \
 firefox system-config-printer-gnome xfce4-pulseaudio-plugin \
-pan sabnzbdplus zathura a2ps fossil dwww ncdu rlwrap smartmontools
+pan sabnzbdplus zathura a2ps fossil dwww ncdu rlwrap smartmontools backintime-qt4
 
 #dwww returns cgi errors fix whith sudo a2enmod cgi then sudo service apache2 restart
 pushd /tmp
