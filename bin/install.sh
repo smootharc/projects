@@ -9,7 +9,7 @@ apt install \
 xfce4-goodies ranger mpv feh htop glances desktop-webmail \
 firefox system-config-printer-gnome xfce4-pulseaudio-plugin \
 pan sabnzbdplus zathura a2ps fossil dwww ncdu rlwrap smartmontools backintime-qt4 \
-tcl8.6 tcl8.6-doc tk8.6 tk8.6-doc expect
+tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc expect
 
 #dwww returns cgi errors fix whith sudo a2enmod cgi then sudo service apache2 restart
 a2enmod cgi
