@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 
 gcalcli --tsv --calendar Medical agenda "365 days ago" "now" | \

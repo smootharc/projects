@@ -48,7 +48,7 @@ UXTerm.foreground: white
 UXTerm*renderFont: true
 UXTerm*faceName: DejaVu Sans Mono
 UXTerm*faceSize: 13
-UXTerm.vt100.selectToClipboard: true
+!UXTerm.vt100.selectToClipboard: true
 UXTerm*VT100.Translations: #override \
     Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
     Ctrl Shift <Key>V: insert-selection(CLIPBOARD)
