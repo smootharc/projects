@@ -26,7 +26,7 @@ alias meds='gcalcli --calendar Medical'
 alias mana='man -a'
 alias mank='man -k'
 alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
-stty -ixon
+#stty -ixon
 = ()
 {
     bc -l <<< "$@"
@@ -34,10 +34,10 @@ stty -ixon
 
 now ()
 {
-        date +"%Y-%m-%d %H:%M"
+    date +"%Y-%m-%d %H:%M"
 }
 
 tclsh ()
 {
-        rlwrap tclsh "$@"
+    rlwrap tclsh "$@"
 }

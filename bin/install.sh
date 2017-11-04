@@ -6,7 +6,7 @@ add-apt-repository ppa:mc3man/mpv-tests
 apt update
 
 apt install \
-byobu xfce4-goodies ranger mpv feh htop glances desktop-webmail moreutils\
+byobu xfce4-goodies ranger mpv feh htop glances desktop-webmail moreutils \
 firefox system-config-printer-gnome xfce4-pulseaudio-plugin \
 pan sabnzbdplus zathura a2ps fossil dwww ncdu rlwrap smartmontools backintime-qt4 \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc expect lightdm-gtk-greeter-settings
