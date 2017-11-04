@@ -1,7 +1,33 @@
-#!/usr/bin/tclsh
+#!/usr/bin/env tclsh
     
-puts "Hello World!" ;#my first program in tcl
+package require fileutil
 
-set a [find ~/XXX -regextype 
+set searchstring [lindex $argv 0]
+
+if ![string length $searchstring] { puts "\nUsage: [file tail $argv0] somesearchstring.\n"; exit 1 }
+
+append searchstring "*|*"
+
+set mimefile [::fileutil::cat /etc/mime.types]
+
+set mimefile [regsub -all {\t+| } $mimefile |] 
+
+set result ""
+
+foreach line [split $mimefile \n] {
+    
+    set ismatch [string match $searchstring $line]
+    
+    if $ismatch {
+        
+        set line [regsub {[^\|]+\|} $line ""]
+
+        append result $line "|"
+
+    }
+
+}
+
+puts -nonewline [string trim $result "|"]
 
 
