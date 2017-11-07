@@ -6,7 +6,7 @@ set showcmd
 "set hlsearch
 set tabstop=4 shiftwidth=4 expandtab
 set listchars=space:ᵕ,eol:¬,tab:»-
-set list
+"set list
 set wildmenu
 syntax on
 colorscheme slate
