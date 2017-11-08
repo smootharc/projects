@@ -43,7 +43,7 @@ XTerm*renderFont: true
 XTerm*faceName: DejaVu Sans Mono
 XTerm*faceSize: 13
 
-UXTerm.background: black
+UXTerm.background: #152233
 UXTerm.foreground: white
 UXTerm*renderFont: true
 UXTerm*faceName: DejaVu Sans Mono
