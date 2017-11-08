@@ -1,2 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
+pushd ~ &> /dev/null
 rsync -a .bashrc .bash_aliases .gcalclirc .Xresources .vimrc .gvimrc projects bin Documents Pictures Music Desktop paul@ts:~/
+popd &> /dev/null
