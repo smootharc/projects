@@ -1,0 +1,2 @@
+#!/bin/sh
+rsync -a .bashrc .bash_aliases .gcalclirc .Xresources .vimrc .gvimrc projects bin Documents Pictures Music Desktop paul@ts:~/
