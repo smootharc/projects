@@ -1,22 +1,4 @@
-#!/bin/sh
-
-awk -F, '
-
-function thirdslash(url) {
-    
-    slashcount = 0
-
-    for (i=1; i <= length(url); i++) {
-
-        if ("/" == substr(url,i,1))
-            slashcount++
-
-        if (slashcount == 3)
-            return substr(url,1,i-1)
-    }
-
-    return url
-} 
+#!/usr/bin/awk -f 
 
 function bareurl(url) {
 
@@ -25,13 +7,12 @@ function bareurl(url) {
     
 }
 
-
 BEGIN {
 
-#    print ARGC
-#    for (i = 0; i < ARGC; i++) print ARGV[i]
-    if ( ARGC > 2 || ARGC < 2 ) { printf( "\nNo File Name.\n");print;exit }
-    else print
+    ARGV[1] = "/home/paul/Documents/lastpass.csv"
+    ARGC = 2
+    FS = ","
+    print
 
 }
 
@@ -39,4 +20,4 @@ BEGIN {
 
 END { print "" }
 
-' $1
+

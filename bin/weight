@@ -10,16 +10,16 @@ function trim(s)  { return rtrim(ltrim(s)); }
 
 
 BEGIN {
-             printf "%s %s %s %s", "Date       ", "Time ", "Weight", "Comment"; print 
-             printf "%s %s %s %s", "~~~~~~~~~~ ", "~~~~~", "~~~~~~", "~~~~~~~"; print 
-           }
+          printf "%s %s %s %s", "Date       ", "Time ", "Weight", "Comment"; print 
+          printf "%s %s %s %s", "~~~~~~~~~~ ", "~~~~~", "~~~~~~", "~~~~~~~"; print 
+      }
 
-  /Weight/ {
+/Weight/ {
              count+=1; sum+=$6; 
              printf "%-11s %5s %.2f", $1, $2, $6; $1=$2=$3=$4=$5=$6=""; printf " %s\n", trim($0) 
-           } 
+         } 
 
-     END   { 
-             print "~~~~~~~~~~~~~~~~~~~~~~~~";
-             printf "%17s %s\n", "Average weight:", sum/count 
-           }'
+    END   { 
+              print "~~~~~~~~~~~~~~~~~~~~~~~~";
+              printf "%17s %s\n", "Average weight:", sum/count 
+          }'
