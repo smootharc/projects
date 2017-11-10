@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #Latest mpv requires the following ppa.
 add-apt-repository ppa:mc3man/mpv-tests
