@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
-pushd ~ &> /dev/null
-rsync -a .bashrc .bash_aliases .gcalclirc .Xresources .vimrc .gvimrc projects bin Documents Pictures Music Desktop paul@ts:~/
-popd &> /dev/null
+#!/bin/sh
+cd
+#rsync -a .bashrc .bash_aliases .gcalclirc .Xresources .vimrc .gvimrc projects bin Documents Pictures Music Desktop paul@ts:~/
+rsync -av --log-file=/home/paul/tmp/back2ts.log .bashrc .bash_aliases .gcalclirc .Xresources .vimrc .gvimrc projects bin Documents Pictures Music Desktop paul@ts:~/
+cd -
