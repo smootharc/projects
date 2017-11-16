@@ -18,10 +18,9 @@ while( my $line = <MIMETYPES> ) {
 
     if ( $line =~ /^$type.*\t/ ) {
 
-        $line =~ s/ |\t+/~/;
-        $line =~ s/\s/\|/;
+        $line =~ s/\t+/~/;
+        $line =~ s/\s/\|/g;
         $line =~ s/.+~//;
-        $line =~ s/\n/\|/;
         $output = "${output}${line}"
 
     }
