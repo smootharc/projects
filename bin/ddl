@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-if numfmt -- "$1" &> /dev/null; then
+#!/bin/sh
+if numfmt -- "$1" > /dev/null 2>&1; then
         find /home/paul/Downloads -type f -cmin +"$1" -delete
         find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
 else
