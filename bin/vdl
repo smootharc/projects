@@ -1,14 +1,17 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-#feh -Ff <(find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1)
-#if ! feh -rqdFnSmtime ~/Downloads &> /dev/null; then
-#echo VDL;read
 playlist="$(mktemp)"
-#find ~/Downloads -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep image/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
+
 find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions image/))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
-if ! feh -dqF -f "$playlist" 2> /dev/null; then
+
+if ! feh -dqF -f "$playlist" > /dev/null 2>&1; then
+
         echo "No images found!"
+
 fi
-[[ -f "$playlist" ]] && rm "$playlist"
+
+test -f "$playlist" && rm "$playlist"
+
 vids ~/Downloads
+
 ddl $1
