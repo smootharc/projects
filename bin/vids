@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 usage () 
 {
@@ -8,7 +8,7 @@ usage ()
 
 }
 
-if [[ "$#" -gt 1 ]]; then
+if test "$#" -gt 1 ; then
         usage
 fi
 
@@ -19,15 +19,10 @@ else
 fi
 
 playlist="$(mktemp)"
-#eval "find -type f $dirname -regextype posix-extended -iregex '.*("$(videoextensions)")$'"
-#regex=$(videoextensions)
-#find="find $directory -regextype posix-extended -iregex '.*("$regex")'"
 
-#read
-#find "$dirname" -type f -printf '%C@\t%p\n' | sort -g | cut -f 2 | file -if - | grep video/ | cut --output-delimiter='\n' -d: -f 1 > "$playlist"
 find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video/))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
 
-if [[ -s "$playlist" ]]; then
+if test -s "$playlist" ; then
 
     mpv --fs --playlist="$playlist"
 
@@ -37,4 +32,4 @@ else
 
 fi
 
-[[ -f "$playlist" ]] && rm "$playlist"
+test -f "$playlist" && rm "$playlist"
