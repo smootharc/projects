@@ -12,7 +12,6 @@ function scriptname () {
 BEGIN {
 
     search = ARGV[1]
-    ARGC = 2
     if ( length(search) == 0 ) {
         print "\n", "Usage:", scriptname(), "somefiletype.\n"
         exit 1

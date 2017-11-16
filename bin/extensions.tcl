@@ -29,5 +29,3 @@ foreach line [split $mimefile \n] {
 }
 
 puts -nonewline [string trim $result "|"]
-
-
