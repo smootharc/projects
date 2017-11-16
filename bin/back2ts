@@ -1,4 +1,3 @@
 #!/bin/sh
-cd
-rsync -a .bashrc .bash_aliases .gcalclirc .Xresources .vimrc .gvimrc projects bin Documents Pictures Music Desktop paul@ts:~/
-cd -
+
+cd && chronic rsync -av --recursive --files-from=.back2ts.lst --log-file=tmp/back2ts.log . paul@ts:~/
