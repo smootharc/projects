@@ -7,14 +7,18 @@ sqlite3 db /home/paul/Desktop/medical.db
 
 ::term::ansi::send::import
 
+proc usage { message } {
+    puts "\nUsage: [file tail [info script]] $message\n"
+}
+
 proc putsatcolumn { thestring width } {
 
     set start 0
     while 1 {
         set end [expr { $start + $width + 1}]
-        set remainder [string range $thestring $start $end]
-        if { [string length $remainder] < $width } {
-            set line "$remainder"
+        set nextline [string range $thestring $start $end]
+        if { [string length $nextline] < $width } {
+            set line "$nextline"
             puts $line
             break
         } else {
@@ -29,6 +33,51 @@ proc putsatcolumn { thestring width } {
             set start [expr { $start + $linelength }]
         } else { break }
     }
+}
+
+proc lines { thestring length} {
+
+    set start 0
+    set linelist {}
+    while 1 {
+        set end [expr $start + $length - 1]
+        set nextline [string range $thestring $start $end]
+        if { [string length $nextline] < $length } {
+            set line $nextline
+        } else {
+            set line [regsub {[^[:space:]]+$} [string range $thestring $start $end] "" ]
+        }
+        set linelength [string length $line]
+        if { $linelength > 0 } {
+            lappend linelist $line
+            set start [expr { $start + $linelength }]
+        } else { break }
+    }
+
+    return $linelist
+
+}
+
+proc printdoseline { date time count id name comment } {
+
+    set columns [lindex [exec stty size] 1]
+    set datelength 11
+    set timelength 9
+    set countlength 3
+    set idlength 5
+    set namelength [db onecolumn {select max(length(name)) from medication}]
+    incr namelength 2
+
+    set commentlength [expr { $columns - $datelength - $timelength - $countlength - $idlength - $namelength }]
+
+    set commentlines [lines $comment $commentlength]
+    puts [format "%-${datelength}s%-${timelength}s%-${countlength}s%-${idlength}s%-${namelength}s%-${commentlength}s" $date $time $count $id "$name." [lindex $commentlines 0]]
+    set commentlines [lrange $commentlines 1 end]
+    set indent [expr { $datelength + $timelength + $countlength + $idlength + $namelength }]
+    foreach line $commentlines {
+        puts [format "%s%-${commentlength}s" [string repeat " " $indent] $line]
+    }
+
 }
 
 proc makedatetime { timestring insteadof } {
@@ -50,9 +99,6 @@ proc elapseddays { starttime endtime } {
 
 }
 
-proc usage { message } {
-    puts "\nUsage: [file tail [info script]] $message\n"
-}
 
 proc add { args } {
     puts [lindex [info level 0] 0]
@@ -98,6 +144,26 @@ proc remove { id } {
         puts "\n\nRecord not removed.\n"
     }
 
+}
+
+proc doselist { starttime endtime } {
+
+    set lastdate ""
+    set count 1      
+    db eval {select date(datetime) as date, time(datetime) as time, id, name, comment from dose where datetime between $starttime and $endtime} { 
+        
+        if { $date == $lastdate } {
+            incr count
+            set date ""
+        } else {
+            set count 1
+            set lastdate $date
+            puts ""
+        }
+        
+        printdoseline $date $time $count $id $name $comment
+
+    }     
 }
  
 proc search { searchstring starttime endtime } { 
@@ -165,8 +231,14 @@ switch -exact $command {
             }
 
     remove  { 
-                set $id [lindex $argv 1]
+                set id [lindex $argv 1]
                 remove $id 
+            }
+
+    list    {
+                set starttime [makedatetime [lindex $argv 1] "last week"]
+                set endtime [makedatetime [lindex $argv 2] "now"]
+                doselist $starttime $endtime
             }
 
     search  { 
