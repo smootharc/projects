@@ -1,38 +1,11 @@
 #!/usr/bin/tclsh
 
 package require sqlite3
-package require term::ansi::send
 
 sqlite3 db /home/paul/Desktop/medical.db
 
-::term::ansi::send::import
-
 proc usage { message } {
     puts "\nUsage: [file tail [info script]] $message\n"
-}
-
-proc putsatcolumn { thestring width } {
-
-    set start 0
-    while 1 {
-        set end [expr { $start + $width + 1}]
-        set nextline [string range $thestring $start $end]
-        if { [string length $nextline] < $width } {
-            set line "$nextline"
-            puts $line
-            break
-        } else {
-            set line [regsub {[^[:space:]]+$} [string range $thestring $start $end] "" ]
-        }
-        set linelength [string length $line]
-        if { $linelength > 0 } {
-            send::sc
-            puts "$line"
-            send::rc
-            send::cd
-            set start [expr { $start + $linelength }]
-        } else { break }
-    }
 }
 
 proc lines { thestring length} {
@@ -58,13 +31,43 @@ proc lines { thestring length} {
 
 }
 
+proc printdoses { sql } {
+    
+    if { ! [db exists $sql] } { 
+        puts "\nNone found.\n"
+        exit 1
+    }
+
+    set lastdate ""
+    set count 1      
+
+    db eval $sql { 
+        
+        if { $date == $lastdate } {
+            incr count
+            set date ""
+        } else {
+            set count 1
+            set lastdate $date
+            puts ""
+        }
+        
+        printdoseline $date $time $count $id $name $comment
+ 
+    }
+
+    puts ""
+
+}
+
+
 proc printdoseline { date time count id name comment } {
 
     set columns [lindex [exec stty size] 1]
     set datelength 11
     set timelength 9
     set countlength 3
-    set idlength 5
+    set idlength 7
     set namelength [db onecolumn {select max(length(name)) from medication}]
     incr namelength 2
 
@@ -98,7 +101,6 @@ proc elapseddays { starttime endtime } {
     return [format %.2f [expr { $elapsedseconds/86400.00 }]]
 
 }
-
 
 proc add { args } {
     puts [lindex [info level 0] 0]
@@ -148,46 +150,19 @@ proc remove { id } {
 
 proc doselist { starttime endtime } {
 
-    set lastdate ""
-    set count 1      
-    db eval {select date(datetime) as date, time(datetime) as time, id, name, comment from dose where datetime between $starttime and $endtime} { 
-        
-        if { $date == $lastdate } {
-            incr count
-            set date ""
-        } else {
-            set count 1
-            set lastdate $date
-            puts ""
-        }
-        
-        printdoseline $date $time $count $id $name $comment
+    set sql "select date(datetime) as date, time(datetime) as time, id, name, comment from dose where datetime between '$starttime' and '$endtime' order by datetime"
 
-    }     
+    printdoses $sql
+    
 }
  
 proc search { searchstring starttime endtime } { 
 
-    set sql "select date(datetime) as date, time(datetime) as time, id, name, comment from dose where id in ( select docid from doseft where doseft match '$searchstring' ) and datetime between '$starttime' and '$endtime' order by datetime"
-    if { ! [db exists $sql] } { 
-        puts "\nNone found.\n"
-        exit 1
-    }
-    set lastdate ""
-    set count 1
-    db eval $sql {
-        if { $date == $lastdate } { 
-            incr count
-            puts -nonewline "            "
-        } else {
-            set count 1
-            puts -nonewline "\n$date  "
-            set lastdate $date
-        }
-        puts -nonewline "$count  $time  [format %-5u $id] $name.\t"
-        putsatcolumn $comment 75
-    }
-    puts ""
+    set sql "select date(datetime) as date, time(datetime) as time, id, name, comment from dose where id in 
+            ( select docid from doseft where doseft match '$searchstring' ) and datetime between '$starttime' and '$endtime' order by datetime"
+
+    printdoses $sql
+
 }
 
 proc edit { args } { 
