@@ -16,6 +16,7 @@ export HISTFILESIZE=
 export HISTCONTROL=erasedups:ignoreboth
 export PAGER=less
 export CDPATH=.:~:~/.config
+export RLWRAP_HOME=$HOME/.local/share/rlwrap
 #LS_COLORS=$LS_COLORS;export LS_COLORS
 #export LS_COLORS
 #alias ls='ls --color=auto'

@@ -4,8 +4,11 @@ package require sqlite3
 
 sqlite3 db /home/paul/Desktop/medical.db
 
+db eval { pragma foreign_keys = on }
+
 proc usage { message } {
-    puts "\nUsage: [file tail [info script]] $message\n"
+    puts "\nUsage: [string totitle [file tail [info script]]] $message]\n"
+    exit 1
 }
 
 proc lines { thestring length} {
@@ -60,7 +63,6 @@ proc printdoses { sql } {
 
 }
 
-
 proc printdoseline { date time count id name comment } {
 
     set columns [lindex [exec stty size] 1]
@@ -88,7 +90,16 @@ proc makedatetime { timestring insteadof } {
     if { [string length $timestring] eq 0 } {
         set timestring $insteadof
     }
-    set datetime [clock format [clock scan $timestring] -format "%Y-%m-%d %H:%M:%S"]
+
+    try {
+#        set timeseconds [clock scan $timestring -format {%Y-%m-%d %H:%M:%S}]
+        set timeseconds [clock scan $timestring]
+        set datetime [clock format $timeseconds -format {%Y-%m-%d %H:%M:%S}]
+    } on error e {
+        usage $e
+        exit 1
+    }
+    
     return $datetime
 
 }
@@ -102,8 +113,25 @@ proc elapseddays { starttime endtime } {
 
 }
 
-proc add { args } {
-    puts [lindex [info level 0] 0]
+proc add {} {
+    
+    set datetime [exec rlwrap -D 2 -C datetime -S "Date Time: " -o cat]
+    set name [exec rlwrap -D 2 -C name -S "     Name: " -o cat]
+    set comment [exec rlwrap -D 2 -C comment -S "  Comment: " -o cat]
+    set datetime [makedatetime $datetime now]
+    db eval {insert into dose (datetime, name, comment) values($datetime,$name,$comment)}
+    set id [db last_insert_rowid]
+    db eval { select * from dose where id = $id } {
+
+            puts ""
+            puts "       Id: $id"
+            puts "Date Time: $datetime"
+            puts "     Name: $name"
+            puts "  Comment: $comment"
+            puts ""
+
+    }        
+        
 }
 
 proc remove { id } { 
