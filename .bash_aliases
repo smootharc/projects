@@ -1,11 +1,11 @@
 shopt -s globstar
 shopt -s autocd
 shopt -s cdspell
-#shopt -s failglob
 shopt -s extglob
 shopt -s nocaseglob
 set -o vi
 #set +H
+#shopt -s failglob
 ulimit -s 65536
 export BROWSER=google-chrome-stable
 export INFO_PRINT_COMMAND="a2ps -s 2"
@@ -17,9 +17,6 @@ export HISTCONTROL=erasedups:ignoreboth
 export PAGER=less
 export CDPATH=.:~:~/.config
 export RLWRAP_HOME=$HOME/.local/share/rlwrap
-#LS_COLORS=$LS_COLORS;export LS_COLORS
-#export LS_COLORS
-#alias ls='ls --color=auto'
 alias pics='feh -rqdF'
 alias pan='pan &> /dev/null &'
 alias weather='curl wttr.in/08096'
