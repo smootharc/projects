@@ -7,8 +7,18 @@ sqlite3 db /home/paul/Desktop/medical.db
 db eval { pragma foreign_keys = on }
 
 proc usage { message } {
-    puts "\nUsage: [string totitle [file tail [info script]]] $message]\n"
+    puts "\n [string totitle [file tail [info script]]] $message\n"
     exit 1
+}
+
+proc ifempty { var ifemptyvar } {
+
+    if { [string length $var] == 0 } {
+        set var $ifemptyvar
+    }
+
+    return $var
+
 }
 
 proc lines { thestring length} {
@@ -85,22 +95,29 @@ proc printdoseline { date time count id name comment } {
 
 }
 
-proc makedatetime { timestring insteadof } {
+proc datetimeadd { date increment unit } {
 
-    if { [string length $timestring] eq 0 } {
-        set timestring $insteadof
+    set seconds [clock add [clock scan $date] $increment $unit]
+    set time [clock format $seconds]
+    return [datetimestring $time]
+
+}
+
+proc makedatetime { timestring } {
+
+    if { [string length $timestring] == 0 } {
+        set datecommand "date -Iseconds"
+    } else {
+        set datecommand {date -Iseconds -d "$timestring"}
     }
 
     try {
-#        set timeseconds [clock scan $timestring -format {%Y-%m-%d %H:%M:%S}]
-        set timeseconds [clock scan $timestring]
-        set datetime [clock format $timeseconds -format {%Y-%m-%d %H:%M:%S}]
+        set timestring [eval exec $datecommand]
+        set timestring [string replace $timestring end-5 end ""]
+        set timestring [string map {T " "} $timestring]
     } on error e {
         usage $e
-        exit 1
     }
-    
-    return $datetime
 
 }
 
@@ -115,15 +132,22 @@ proc elapseddays { starttime endtime } {
 
 proc add {} {
     
+    puts ""
     set datetime [exec rlwrap -D 2 -C datetime -S "Date Time: " -o cat]
     set name [exec rlwrap -D 2 -C name -S "     Name: " -o cat]
     set comment [exec rlwrap -D 2 -C comment -S "  Comment: " -o cat]
-    set datetime [makedatetime $datetime now]
+    set datetime [makedatetime $datetime]
+
+    if { ! [db eval { select count(*) from medication where name = $name }] } {
+        puts "\nMedication $name not found.\n"
+        exit 1
+    }
+
     db eval {insert into dose (datetime, name, comment) values($datetime,$name,$comment)}
     set id [db last_insert_rowid]
     db eval { select * from dose where id = $id } {
 
-            puts ""
+            puts "\nRecord added:\n"
             puts "       Id: $id"
             puts "Date Time: $datetime"
             puts "     Name: $name"
@@ -193,8 +217,44 @@ proc search { searchstring starttime endtime } {
 
 }
 
-proc edit { args } { 
-    puts [lindex [info level 0] 0]
+proc edit { id } { 
+
+    puts ""
+    db eval { select * from dose where id = $id } {
+
+        set datetime [exec rlwrap -D 2 -C datetime -S "Date Time: " -P $datetime -o cat]
+        set name [exec rlwrap -D 2 -C name -S "     Name: " -P $name -o cat]
+        set comment [exec rlwrap -D 2 -C comment -S "  Comment: " -P $comment -o cat]
+        set datetime [makedatetime $datetime]
+
+    }
+
+    if { ! [db eval { select count(*) from medication where name = $name }] } {
+        puts "\nMedication $name not found.\n"
+        exit 1
+    }
+        
+    try {
+
+        db eval { update dose set datetime = $datetime,  name = $name, comment = $comment where id = $id }
+
+    } on error e {
+        puts $e
+        exit 1
+    }
+    
+
+    db eval { select * from dose where id = $id } {
+            
+            puts "\nRecord changed to:\n"
+            puts "         Id: $id"
+            puts "  Date Time: $datetime"
+            puts "       Name: $name"
+            puts "    Comment: $comment"
+            puts ""
+
+    }
+        
 }
  
 proc count { medication starttime endtime } { 
@@ -225,7 +285,19 @@ proc count { medication starttime endtime } {
 
 }
 
-set command [lindex $argv 0]
+proc medications {} {
+
+    puts ""
+    db eval { select * from medication order by name } {
+
+        puts $name
+
+    }
+    puts ""
+
+}
+
+set options [lassign $argv command]
 
 switch -exact $command {
     
@@ -234,32 +306,37 @@ switch -exact $command {
             }
 
     remove  { 
-                set id [lindex $argv 1]
+                lassign $options id
                 remove $id 
             }
 
     list    {
-                set starttime [makedatetime [lindex $argv 1] "last week"]
-                set endtime [makedatetime [lindex $argv 2] "now"]
+                lassign $options starttime endtime
+                set starttime [makedatetime [ifempty $starttime "last month"]]
+                set endtime [makedatetime $endtime]
                 doselist $starttime $endtime
             }
 
     search  { 
-                set medication [lindex $argv 1]
-                set starttime [makedatetime [lindex $argv 2] "last year"]
-                set endtime [makedatetime [lindex $argv 3] "now"]
+                lassign $options medication starttime endtime
+                set starttime [makedatetime [ifempty $starttime "last year"]]
+                set endtime [makedatetime $endtime]
                 search $medication $starttime $endtime
             }
 
     edit    { 
-                edit 
+                lassign $options id
+                edit $id
             }
 
     count   { 
-                set medication [lindex $argv 1]
-                set starttime [makedatetime [lindex $argv 2] "1 month ago"]
-                set endtime [makedatetime [lindex $argv 3] "now"]
-                count $medication $starttime $endtime 
+                lassign $options medication starttime endtime
+                set starttime [makedatetime [ifempty $starttime "30 days ago"]]
+                set endtime [makedatetime $endtime]
+                count $medication $starttime $endtime
+            }
+    medications {
+                medications
             }
     default { 
                 usage "Missing arguments."
