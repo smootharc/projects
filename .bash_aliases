@@ -25,6 +25,8 @@ alias mana='man -a'
 alias mank='man -k'
 alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
 alias hdf='df -h -T -x devtmpfs -x tmpfs'
+alias hdt='for d in /dev/sd?; do hddtemp $d; done'
+alias hds='udisksctl status'
 = ()
 {
     bc -l <<< "$@"
