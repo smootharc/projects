@@ -2,7 +2,7 @@
 
 playlist="$(mktemp)"
 
-find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions image/))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
+find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions image))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
 
 if ! feh -dqF -f "$playlist" > /dev/null 2>&1; then
 
