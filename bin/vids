@@ -20,7 +20,7 @@ fi
 
 playlist="$(mktemp)"
 
-find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video/))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
+find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
 
 if test -s "$playlist" ; then
 
