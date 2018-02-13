@@ -18,7 +18,6 @@ export PAGER=less
 export CDPATH=.:~:~/.config
 export RLWRAP_HOME=$HOME/.local/share/rlwrap
 alias pics='feh -rqdF'
-alias pan='pan &> /dev/null &'
 alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
 alias mana='man -a'
