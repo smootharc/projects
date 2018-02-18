@@ -9,12 +9,16 @@ fi
 
 #Latest mpv requires the following ppa.
 add-apt-repository ppa:mc3man/mpv-tests
+add-apt-repository ppa:klaus-vormweg/pan
+add-apt-repository ppa:jcfp/nobetas
+add-apt-repository ppa:jcfp/sab-addons
+add-apt-repository ppa:twodopeshaggy/jarun
 
 apt update
 
 apt install \
 byobu xfce4-goodies catfish ranger mpv feh htop glances desktop-webmail moreutils configure-debian \
-firefox system-config-printer-gnome xfce4-pulseaudio-plugin pinfo clementine hddtemp \
+firefox system-config-printer-gnome xfce4-pulseaudio-plugin pinfo clementine hddtemp googler \
 pan sabnzbdplus zathura zathura-ps a2ps fossil dwww ncdu rlwrap smartmontools backintime-qt4 sshfs \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl lightdm-gtk-greeter-settings exim4
 
