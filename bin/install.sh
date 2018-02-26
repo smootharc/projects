@@ -9,9 +9,12 @@ fi
 
 #Latest mpv requires the following ppa.
 add-apt-repository ppa:mc3man/mpv-tests
+#ppa for pan
 add-apt-repository ppa:klaus-vormweg/pan
+#ppas for sabnzbdplus
 add-apt-repository ppa:jcfp/nobetas
 add-apt-repository ppa:jcfp/sab-addons
+#ppa for googler and ddgr
 add-apt-repository ppa:twodopeshaggy/jarun
 
 apt update
