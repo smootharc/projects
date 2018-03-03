@@ -1,17 +1,36 @@
 #!/bin/sh
 
+cleanup ()
+{
+    test -f "$playlist" && rm "$playlist"
+}
+
+trap cleanup EXIT
+
 playlist="$(mktemp)"
 
-find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions image))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
+find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions image))$" -printf '%C@\0%p\n' | sort -g | cut -d '' -f 2 > "$playlist"
 
-if ! feh -dqF -f "$playlist" > /dev/null 2>&1; then
+if test -s "$playlist"; then
+
+    feh -dqFf $playlist > /dev/null 2>&1
+
+else
 
         echo "No images found!"
 
 fi
 
-test -f "$playlist" && rm "$playlist"
+find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%C@\0%p\n' | sort -g | cut -d '' -f 2 > "$playlist"
 
-vids ~/Downloads
+if test -s "$playlist"; then
 
-ddl $1
+    mpv --really-quiet --playlist="$playlist"
+
+else
+
+    echo "No videos found!"
+
+fi
+
+ddl "$1"

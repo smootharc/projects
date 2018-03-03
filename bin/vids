@@ -2,34 +2,29 @@
 
 usage () 
 {
-
         echo "Usage: vids OneValidDirectoryName"
         exit 1
-
 }
 
-if test "$#" -gt 1 ; then
-        usage
-fi
+cleanup ()
+{
+    test -f "$playlist" && rm "$playlist"
+}
 
-if ! test -d "$1"; then
-        usage
-else
+if test -d "$1"; then
         dirname=$(realpath "$1")
+else
+        usage
 fi
 
 playlist="$(mktemp)"
 
-find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%C@\t%p\n' | sort -g | cut -f 2 > "$playlist"
+trap cleanup EXIT
+
+find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%C@\0%p\n' | sort -g | cut -d '' -f 2 > "$playlist"
 
 if test -s "$playlist" ; then
-
-    mpv --fs --playlist="$playlist"
-
+    mpv --really-quiet --playlist="$playlist"
 else
-
     echo "No videos found!"
-
 fi
-
-test -f "$playlist" && rm "$playlist"
