@@ -21,7 +21,8 @@ playlist="$(mktemp)"
 
 trap cleanup EXIT
 
-find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%C@\0%p\n' | sort -g | cut -d '' -f 2 > "$playlist"
+#find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%C@\0%p\n' | sort -g | cut -d '' -f 2 > "$playlist"
+find "$dirname" -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%p\n' > "$playlist"
 
 if test -s "$playlist" ; then
     mpv --really-quiet --playlist="$playlist"
