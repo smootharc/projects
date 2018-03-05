@@ -13,7 +13,7 @@ find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions imag
 
 if test -s "$playlist"; then
 
-    feh -dqFf $playlist > /dev/null 2>&1
+    feh -D 3 -dqFf $playlist > /dev/null 2>&1
 
 else
 
