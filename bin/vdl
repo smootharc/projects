@@ -17,7 +17,7 @@ if test -s "$playlist"; then
 
 else
 
-        echo "No images found!"
+    echo "No images found!"
 
 fi
 
