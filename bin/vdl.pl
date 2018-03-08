@@ -19,23 +19,19 @@ sub images
     {
         my $name = $File::Find::name;
         my $ctime = stat($name)->ctime;
-        push @images, "$ctime\x01$name\n";
+        push @images, "$ctime\x00$name\n";
     }
 }
 
 @images = sort @images;
 
-s/.*\x01// for @images;
+s/.*\x00// for @images;
 
 if (scalar @images) {
 
     my $playlist  = new File::Temp( UNLINK => 1 );
     
-    foreach my $image (@images) {
-        
-        print $playlist $image;
-
-    }
+    print $playlist $_ for @images;
 
     system "feh", "-dqFf", $playlist;
 
@@ -54,23 +50,19 @@ sub videos
     {
         my $name = $File::Find::name;
         my $ctime = stat($name)->ctime;
-        push @videos, "$ctime\x01$name\n";
+        push @videos, "$ctime\x00$name\n";
     }
 }
 
 @videos = sort @videos;
 
-s/.*\x01// for @videos;
+s/.*\x00// for @videos;
 
 if (scalar @videos) {
 
     my $playlist  = new File::Temp( UNLINK => 1 );
     
-    foreach my $video (@videos) {
-        
-        print $playlist $video;
-
-    }
+    print $playlist $_ for @videos;
 
     system "mpv", "--really-quiet", "--playlist=$playlist";
 
