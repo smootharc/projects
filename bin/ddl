@@ -1,7 +1,13 @@
 #!/bin/sh
+
 if numfmt -- "$1" > /dev/null 2>&1; then
-        find /home/paul/Downloads -type f -cmin +"$1" -delete
-        find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
+
+    find /home/paul/Downloads -type f -cmin +"$1" -delete
+
 else
-        echo "No or non-numeric time specified.  Nothing deleted."			
+
+    echo "No or non-numeric time specified.  No files deleted."			
+
 fi
+
+find /home/paul/Downloads -not -path '/home/paul/Downloads' -type d -empty -delete
