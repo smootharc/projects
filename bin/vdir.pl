@@ -5,6 +5,7 @@ use warnings;
 use File::Temp;
 use File::MimeInfo;
 use File::stat;
+use Cwd 'abs_path'; 
 use 5.22.1;
 
 sub processdir
@@ -16,7 +17,7 @@ sub processdir
 
     while (readdir $fh) {
 
-        if ( $_ eq "." || $_ eq ".." ) { next }
+        if ( $_ eq "." || $_ eq ".." || -l $_ ) { next }
 
         my $fullname = "$_[0]/$_";
 
@@ -62,7 +63,20 @@ sub filesoftype
     return( @return );
 }
 
-my $directory = glob $ARGV[0] // "~/Downloads";
+my $directory = glob $ARGV[0] // glob "~/Downloads";
+
+my $time = $ARGV[1] // '';
+
+if ( -e $directory and -d $directory ) {
+    
+    $directory = abs_path($directory);
+
+} else {
+
+    $time = $directory;
+    $directory = glob "~/Downloads";
+
+}
 
 my @files = processdir( $directory );
 
@@ -97,8 +111,6 @@ if ( scalar @videos ) {
     print "No videos found!\n"
 
 }
-
-my $time = $ARGV[1] // '';
 
 if ( $directory =~ /Downloads/ ) {
 
