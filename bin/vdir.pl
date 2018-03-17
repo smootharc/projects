@@ -90,6 +90,7 @@ if ( scalar @images ) {
 
     print $playlist $_ for @images;
 
+#    system "qiv", "-tfiF", $playlist;
     system "feh", "-dqFf", $playlist;
 
 } else {
@@ -102,9 +103,12 @@ if ( scalar @videos ) {
 
     my $playlist = new File::Temp( UNLINK => 1 );
 
+    print $playlist "#EXTM3U\n";
+
     print $playlist $_ for @videos;
 
-    system "mpv", "--really-quiet", "--playlist=$playlist";
+#    system "mpv", "--really-quiet", "--playlist=$playlist";
+    system "mpv", "--really-quiet", $playlist;
 
 } else {
 
