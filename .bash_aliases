@@ -17,7 +17,6 @@ export HISTCONTROL=erasedups:ignoreboth
 export PAGER=less
 export CDPATH=.:~:~/.config
 export RLWRAP_HOME=$HOME/.local/share/rlwrap
-export PATH=~/.local/bin:$PATH
 alias pics='feh -rqdFD 3'
 alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
