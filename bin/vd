@@ -13,7 +13,7 @@ sub processdir
 
     my @return;
 
-    opendir( my $fh, "$_[0]" ) || die "Usage: $0 [Directory] [Time]\n";
+    opendir( my $fh, "$_[0]" );
 
     while (readdir $fh) {
 
@@ -67,14 +67,23 @@ my $directory = glob $ARGV[0] // glob "~/Downloads";
 
 my $time = $ARGV[1] // '';
 
-if ( -e $directory and -d $directory ) {
+if ( -d $directory ) {
     
     $directory = abs_path($directory);
 
 } else {
 
-    $time = $directory;
-    $directory = glob "~/Downloads";
+    if ( $directory =~ /^\d+$/ ) {
+        
+            $time = $directory;
+            $directory = glob "~/Downloads";
+
+        } else {
+
+            $0 =~ s/.*\///;
+            die "\nUsage: $0 [ValidDirectory] [Time]\n\n";
+
+        }
 
 }
 
@@ -90,7 +99,6 @@ if ( scalar @images ) {
 
     print $playlist $_ for @images;
 
-#    system "qiv", "-tfiF", $playlist;
     system "feh", "-dqFf", $playlist;
 
 } else {
@@ -107,7 +115,6 @@ if ( scalar @videos ) {
 
     print $playlist $_ for @videos;
 
-#    system "mpv", "--really-quiet", "--playlist=$playlist";
     system "mpv", "--really-quiet", $playlist;
 
 } else {
@@ -116,8 +123,12 @@ if ( scalar @videos ) {
 
 }
 
-if ( $directory =~ /Downloads/ ) {
+if ( $directory eq "/home/paul/Downloads" ) {
 
-   exec "ddl", $time;
+    exec "ddl", $time;
+
+} else {
+
+    print "Not Downloads directory. Nothing deleted.\n";
 
 }
