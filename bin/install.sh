@@ -21,7 +21,7 @@ apt update
 
 apt install \
 byobu xfce4-goodies catfish ranger mpv feh htop glances desktop-webmail moreutils configure-debian \
-firefox system-config-printer-gnome xfce4-pulseaudio-plugin pinfo clementine hddtemp googler blueman pulseaudio-module-bluetooth \
+firefox system-config-printer-gnome xfce4-pulseaudio-plugin pinfo clementine hddtemp googler ddgr blueman pulseaudio-module-bluetooth \
 pan sabnzbdplus zathura zathura-ps a2ps fossil dwww ncdu rlwrap smartmontools backintime-qt4 sshfs \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl lightdm-gtk-greeter-settings exim4
 
