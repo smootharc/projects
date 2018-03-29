@@ -17,7 +17,7 @@ export HISTCONTROL=erasedups:ignoreboth
 export PAGER=less
 export CDPATH=.:~:~/.config
 export RLWRAP_HOME=$HOME/.local/share/rlwrap
-alias pics='feh -rqdFD 3'
+alias pics='feh -rqdFD -5'
 alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
 alias mana='man -a'
@@ -26,7 +26,14 @@ alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
 alias hdf='df -h -T -x devtmpfs -x tmpfs'
 alias hdt='for d in /dev/sd?; do hddtemp $d; done'
 alias hds='udisksctl status'
-#alias vdl='vd ~/Downloads'
+
+hdu () 
+{
+
+[[ -n $1 ]] && udisksctl unmount --block-device "/dev/$1"
+
+}
+
 = ()
 {
     bc -l <<< "$@"
