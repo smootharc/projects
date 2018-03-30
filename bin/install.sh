@@ -20,10 +20,10 @@ add-apt-repository ppa:twodopeshaggy/jarun
 apt update
 
 apt install \
-byobu xfce4-goodies catfish ranger mpv feh htop glances desktop-webmail moreutils configure-debian \
-firefox system-config-printer-gnome xfce4-pulseaudio-plugin pinfo clementine hddtemp googler ddgr blueman pulseaudio-module-bluetooth \
-pan sabnzbdplus zathura zathura-ps a2ps fossil dwww ncdu rlwrap smartmontools backintime-qt4 sshfs \
-tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl lightdm-gtk-greeter-settings exim4
+byobu ranger mpv feh glances moreutils configure-debian \
+firefox pinfo clementine hddtemp googler ddgr \
+pan sabnzbdplus zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs \
+tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
 
 #dwww returns cgi errors fix whith sudo a2enmod cgi then sudo service apache2 restart.  Still need to edit a perl script to fix this completely.  I forget exactly what it is.
 a2enmod cgi
