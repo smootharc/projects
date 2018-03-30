@@ -17,7 +17,7 @@ sub processdir
 
     while (readdir $fh) {
 
-        if ( $_ eq "." || $_ eq ".." || -l $_ ) { next }
+        if ( $_ eq "." || $_ eq ".." || -l $_ || /.*iso$/) { next }
 
         my $fullname = "$_[0]/$_";
 
@@ -93,6 +93,8 @@ my @images = filesoftype( @files, "image" );
 
 my @videos = filesoftype( @files, "video" );
 
+#print @images;
+
 if ( scalar @images ) {
 
     my $playlist = new File::Temp( UNLINK => 1 );
@@ -123,7 +125,11 @@ if ( scalar @videos ) {
 
 }
 
-if ( $directory eq "/home/paul/Downloads" ) {
+if ( $time eq '' ) {
+
+    exit;
+
+} elsif ( $directory eq "/home/paul/Downloads" ) {
 
     exec "ddl", $time;
 
