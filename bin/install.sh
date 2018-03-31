@@ -21,7 +21,7 @@ apt update
 
 apt install \
 byobu ranger mpv feh glances moreutils configure-debian \
-firefox pinfo clementine hddtemp googler ddgr \
+firefox pinfo clementine hddtemp googler ddgr racket gcalcli \
 pan sabnzbdplus zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
 
@@ -36,5 +36,5 @@ popd
 apt install -f
 apt autoremove
 
-#Just accept all of the defaults presented by the following program.
+#Just accept all of the defaults presented by the following program except the mailbox location.
 dpkg-reconfigure exim4-config
