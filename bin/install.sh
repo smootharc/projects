@@ -20,10 +20,13 @@ add-apt-repository ppa:twodopeshaggy/jarun
 apt update
 
 apt install \
-byobu ranger mpv feh glances moreutils configure-debian \
+byobu ranger mpv feh glances moreutils configure-debian partitionmanager \
 firefox pinfo clementine hddtemp googler ddgr racket gcalcli \
-pan sabnzbdplus zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs \
+zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
+
+read -n 1 -p "Install pan and sabnzbdplus? [y]"
+[[ $REPLY =~ y|Y ]] && apt install pan sabnzbdplus
 
 #dwww returns cgi errors fix whith sudo a2enmod cgi then sudo service apache2 restart.  Still need to edit a perl script to fix this completely.  I forget exactly what it is.
 a2enmod cgi
