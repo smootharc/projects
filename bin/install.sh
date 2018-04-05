@@ -15,8 +15,8 @@ add-apt-repository -y ppa:twodopeshaggy/jarun
 apt update
 
 apt install \
-byobu ranger mpv feh glances moreutils configure-debian partitionmanager \
-firefox pinfo clementine hddtemp googler ddgr pdd racket gcalcli \
+byobu ranger mpv feh glances moreutils configure-debian partitionmanager k3b \
+firefox pinfo clementine hddtemp googler ddgr pdd racket gcalcli vim-nox\
 zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
 
