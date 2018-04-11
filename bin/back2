@@ -1,8 +1,8 @@
 #!/bin/sh
 
 if [ -z "$1" ]; then
-    echo "No remote machine specified."
+    echo "Usage: $0 sshservername."
     exit 1  
 fi
 
-cd && chronic rsync -avr --delete -f "exclude xfce4-power-manager.xml" --files-from=.back2.lst --log-file=/tmp/back2.log . "$1":~/
+cd && chronic rsync -avr --delete --timeout=60 -f "exclude xfce4-power-manager.xml" --files-from=.back2.lst --log-file=/tmp/back2.log . "$1":~/

@@ -1,0 +1,11 @@
+#!/bin/sh -l
+
+if [ "$(id -u)" -ne "0" ]; then
+
+    sudo "$0" "$@"
+    exit
+
+fi
+
+apt update && apt upgrade && apt autoremove
+    
