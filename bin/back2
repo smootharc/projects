@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    echo "No remote machine specified."
+    exit 1  
+fi
+
+cd && chronic rsync -avr --delete -f "exclude xfce4-power-manager.xml" --files-from=.back2ts.lst --log-file=/tmp/back2ts.log . "$1":~/
