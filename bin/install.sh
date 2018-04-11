@@ -14,8 +14,8 @@ add-apt-repository -y ppa:twodopeshaggy/jarun
 
 apt update
 
-apt install \
-byobu ranger mpv feh glances moreutils configure-debian partitionmanager k3b kexi \
+apt-get -y install \
+byobu ranger mpv feh glances moreutils configure-debian partitionmanager k3b kexi openssh-server \
 firefox pinfo clementine hddtemp googler ddgr pdd racket gcalcli vim-gtk khelpcenter \
 zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs sqlite3 sqlite3-doc \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
@@ -29,7 +29,7 @@ add-apt-repository -y ppa:klaus-vormweg/pan
 #ppas for sabnzbdplus
 add-apt-repository -y ppa:jcfp/nobetas
 add-apt-repository -y ppa:jcfp/sab-addons
-apt install pan sabnzbdplus par2-tbb
+apt-get -y install pan sabnzbdplus par2-tbb
 
 fi
 
