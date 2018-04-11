@@ -16,20 +16,20 @@ apt update
 
 apt-get -y install \
 byobu ranger mpv feh glances moreutils configure-debian partitionmanager k3b kexi openssh-server \
-firefox pinfo clementine hddtemp googler ddgr pdd racket gcalcli vim-gtk khelpcenter \
+firefox pinfo clementine hddtemp googler ddgr pdd racket gcalcli vim-gtk khelpcenter yakuake \
 zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs sqlite3 sqlite3-doc \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
 
-read -n 1 -p "Install pan and sabnzbdplus? [y]"
-if [[ $REPLY =~ y|Y ]]
-then
+read -t 60 -n 1 -p "Press y to install pan and sabnzbdplus."
 
-#ppa for pan
-add-apt-repository -y ppa:klaus-vormweg/pan
-#ppas for sabnzbdplus
-add-apt-repository -y ppa:jcfp/nobetas
-add-apt-repository -y ppa:jcfp/sab-addons
-apt-get -y install pan sabnzbdplus par2-tbb
+if [[ $REPLY =~ y|Y ]]; then
+
+    #ppa for pan
+    add-apt-repository -y ppa:klaus-vormweg/pan
+    #ppas for sabnzbdplus
+    add-apt-repository -y ppa:jcfp/nobetas
+    add-apt-repository -y ppa:jcfp/sab-addons
+    apt-get -y install pan sabnzbdplus par2-tbb
 
 fi
 
@@ -47,4 +47,4 @@ apt autoremove
 #Just accept all of the defaults presented by the following program except the mailbox location.
 dpkg-reconfigure exim4-config
 
-echo "Background color for desktop, SDDM login screen and lock screen is #152233.  They are entered in three different places"
+echo "Background color for desktop, SDDM login screen and lock screen is #152233.  They are entered in three different places. One is in /usr/share/sddm/themes"
