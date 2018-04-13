@@ -259,19 +259,45 @@ proc edit { id } {
  
 proc count { medication starttime endtime } { 
   
-    puts $medication
+    set medcount [db eval "select count(*) from medication where name like '%$medication%'"]
 
-    if { ! [db exists "select * from medication where name like '%$medication%'"] } {
-        puts "\nMedication $medication not found.\n"
-        exit 1
-    } else {
-        set medication [db onecolumn "select name from medication where name like '%$medication%'"]
+    switch $medcount {
+
+        1 {
+                        
+            set medication [db onecolumn "select name from medication where name like '%$medication%'"]
+    
+        }
+
+        default {
+        
+            set medication ""
+
+            while { [ expr { $medication eq "" } ] } {
+
+                puts "\nNo or more than one medication found."
+
+                medications
+    
+                puts -nonewline "Enter the number of the one you want: "
+
+                flush stdout
+
+                gets stdin response
+
+                set medication [db eval "select name from medication where rowid = '$response'"]
+
+            }
+
+        }
+
     }
+       
 
-    set sql "select count(*) from dose where name like '%$medication%' and datetime between '$starttime' and '$endtime'"
+    set sql "select count(*) from dose where name = '$medication' and datetime between '$starttime' and '$endtime'"
     set doses [db onecolumn $sql]
     if { ! $doses } {
-        puts "\nNo doses for Medication $medication found.\n"
+        puts "\nNo doses for Medication $medication found between $starttime and $endtime.\n"
         exit 1
     }
     set days [elapseddays $starttime $endtime]
