@@ -329,43 +329,43 @@ proc medications {} {
 
 set options [lassign $argv command]
 
-switch -exact $command {
+switch -glob $command {
     
-    add     { 
+    a*     { 
                 add 
             }
 
-    remove  { 
+    r*  { 
                 lassign $options id
                 remove $id 
             }
 
-    list    {
+    l*    {
                 lassign $options starttime endtime
                 set starttime [makedatetime [ifempty $starttime "last month"]]
                 set endtime [makedatetime $endtime]
                 doselist $starttime $endtime
             }
 
-    search  { 
+    s*  { 
                 lassign $options medication starttime endtime
                 set starttime [makedatetime [ifempty $starttime "last year"]]
                 set endtime [makedatetime $endtime]
                 search $medication $starttime $endtime
             }
 
-    edit    { 
+    e*    { 
                 lassign $options id
                 edit $id
             }
 
-    count   { 
+    c*   { 
                 lassign $options medication starttime endtime
                 set starttime [makedatetime [ifempty $starttime "30 days ago"]]
                 set endtime [makedatetime $endtime]
                 count $medication $starttime $endtime
             }
-    medications {
+    m* {
                 medications
             }
     default { 
