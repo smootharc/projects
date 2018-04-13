@@ -329,47 +329,66 @@ proc medications {} {
 
 set options [lassign $argv command]
 
-switch -glob $command {
+switch $command {
     
-    a*     { 
+    add     { 
+
                 add 
+
             }
 
-    r*  { 
+
+    remove  { 
+
                 lassign $options id
                 remove $id 
+
             }
 
-    l*    {
+    list    {
+
                 lassign $options starttime endtime
                 set starttime [makedatetime [ifempty $starttime "last month"]]
                 set endtime [makedatetime $endtime]
                 doselist $starttime $endtime
+
             }
 
-    s*  { 
+    search  { 
+
                 lassign $options medication starttime endtime
                 set starttime [makedatetime [ifempty $starttime "last year"]]
                 set endtime [makedatetime $endtime]
                 search $medication $starttime $endtime
+
             }
 
-    e*    { 
+    edit    { 
+
                 lassign $options id
                 edit $id
+
             }
 
-    c*   { 
+    count   { 
+
                 lassign $options medication starttime endtime
                 set starttime [makedatetime [ifempty $starttime "30 days ago"]]
                 set endtime [makedatetime $endtime]
                 count $medication $starttime $endtime
+
             }
-    m* {
+
+    medications {
+
                 medications
+
             }
+
     default { 
+
                 usage "Missing arguments."
+
             }
 
 }
