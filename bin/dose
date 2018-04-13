@@ -259,6 +259,8 @@ proc edit { id } {
  
 proc count { medication starttime endtime } { 
   
+    puts $medication
+
     if { ! [db exists "select * from medication where name like '%$medication%'"] } {
         puts "\nMedication $medication not found.\n"
         exit 1
@@ -288,11 +290,13 @@ proc count { medication starttime endtime } {
 proc medications {} {
 
     puts ""
-    db eval { select * from medication order by name } {
 
-        puts $name
+    db eval { select rowid, name from medication order by name } {
+
+    puts "$rowid $name"
 
     }
+
     puts ""
 
 }
