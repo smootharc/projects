@@ -15,8 +15,8 @@ add-apt-repository -y ppa:twodopeshaggy/jarun
 apt update
 
 apt-get -y install \
-byobu ranger mpv feh glances moreutils configure-debian partitionmanager k3b kexi openssh-server \
-firefox pinfo clementine hddtemp googler ddgr pdd racket gcalcli vim-gtk khelpcenter yakuake \
+byobu ranger mpv feh glances moreutils configure-debian openssh-server \
+firefox pinfo hddtemp googler ddgr pdd gcalcli vim-gtk xmonad dmenu gmrun \
 zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs sqlite3 sqlite3-doc \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
 
@@ -47,4 +47,4 @@ apt autoremove
 #Just accept all of the defaults presented by the following program except the mailbox location.
 dpkg-reconfigure exim4-config
 
-echo "Background color for desktop, SDDM login screen and lock screen is #152233.  They are entered in three different places. One is in /usr/share/sddm/themes"
+echo "Background color for desktop and login screen is #152233."
