@@ -15,9 +15,9 @@ add-apt-repository -y ppa:twodopeshaggy/jarun
 apt update
 
 apt-get -y install \
-byobu ranger mpv feh glances moreutils configure-debian openssh-server \
-firefox pinfo hddtemp googler ddgr pdd gcalcli vim-gtk xmonad dmenu gmrun \
-zathura zathura-ps a2ps fossil dwww rlwrap smartmontools backintime-qt4 sshfs sqlite3 sqlite3-doc \
+byobu ranger mpv feh glances moreutils configure-debian openssh-server apt-file \
+firefox pinfo hddtemp googler ddgr pdd gcalcli vim-gtk xmonad dmenu gmrun nload rdiff-backup \
+zathura zathura-ps a2ps fossil dwww rlwrap smartmontools sshfs sqlite3 sqlite3-doc \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4
 
 read -t 60 -n 1 -p "Press y to install pan and sabnzbdplus."
