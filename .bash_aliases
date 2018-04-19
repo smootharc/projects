@@ -23,9 +23,10 @@ alias meds='gcalcli --calendar Medical'
 alias mana='man -a'
 alias mank='man -k'
 alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
-alias hdf='df -h -T -x devtmpfs -x tmpfs'
+alias hdf='df -h -T -x devtmpfs -x tmpfs -x squashfs'
 alias hdt='for d in /dev/sd?; do hddtemp $d; done'
 alias hds='udisksctl status'
+alias chrome='google-chrome-stable &>/dev/null &'
 hdu () 
 {
 
