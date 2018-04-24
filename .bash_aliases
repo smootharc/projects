@@ -58,6 +58,7 @@ export RESTIC_PASSWORD_FILE=~/.config/restic/password
 export RESTIC_REPOSITORY=/backup/$USER
 
 
+alias keys='less /usr/include/X11/keysymdef.h'
 alias pics='feh -rqdFD -5 &>/dev/null'
 alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
