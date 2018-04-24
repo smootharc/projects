@@ -47,10 +47,10 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   , (( 0 , xK_Print),
      spawn "xfce4-screenshooter")
 
-  , ((modMask, xK_p),
+  , (( 0 , xK_Menu),
      spawn "xfce4-appfinder")
 
-  , ((modMask .|. shiftMask, xK_p),
+  , ((modMask, xK_Menu),
      spawn "dmenu_run")
 
   , ((modMask, xK_w),
@@ -121,10 +121,10 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 --     windows W.focusUp)
      sendMessage $ Go U)
 
-  , ((modMask .|. controlMask, xK_Up),
+  , ((modMask .|. shiftMask, xK_Page_Up),
      windows W.swapUp)
 
-  , ((modMask .|. controlMask, xK_Down),
+  , ((modMask .|. shiftMask, xK_Page_Down),
      windows W.swapDown)
 
   -- Move focus to the master window.
@@ -163,17 +163,17 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   , ((modMask, xK_period),
      sendMessage (IncMasterN (-1)))
 
-  , (( modMask .|. controlMask, xK_Page_Up),
-    prevWS )
+--  , (( modMask .|. controlMask, xK_Page_Up),
+--    prevWS )
 
-  , (( modMask .|. controlMask, xK_Page_Down),
-    nextWS )
+--  , (( modMask .|. controlMask, xK_Page_Down),
+--    nextWS )
 
-  , (( modMask .|. shiftMask, xK_Page_Up),
-    shiftToPrev >> prevWS )
+--  , (( modMask .|. shiftMask, xK_Page_Up),
+--    shiftToPrev >> prevWS )
 
-  , (( modMask .|. shiftMask, xK_Page_Down),
-    shiftToNext >> nextWS )
+--  , (( modMask .|. shiftMask, xK_Page_Down),
+--    shiftToNext >> nextWS )
 
   -- Quit xmonad.
   , ((mod1Mask .|. controlMask, xK_Delete),
