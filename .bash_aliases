@@ -28,7 +28,7 @@ hdu () {
 
 }
 
-= () {
+calc () {
 
     bc -l <<< "$@"
 
@@ -40,10 +40,17 @@ now () {
 
 }
 
+hc () { 
+
+    herbstclient "$@"
+
+}
+
 export -f now
-export -f =
+export -f calc
 export -f hdu
 export -f hdf
+export -f hc
 export BROWSER=google-chrome-stable
 export INFO_PRINT_COMMAND="a2ps -s 2"
 export EDITOR=vim
