@@ -15,6 +15,6 @@ apt update
 
 apt-get -y install \
 tmux sakura ranger mpv feh glances moreutils configure-debian openssh-server apt-file xfce4-goodies \
-firefox pinfo hddtemp googler ddgr pdd gcalcli vim-gtk herbstluftwm suckless-tools stalonetray restic \
+firefox pinfo hddtemp googler ddgr pdd pip vim-gtk herbstluftwm suckless-tools stalonetray restic \
 dex zathura zathura-ps a2ps fossil dwww rlwrap smartmontools sshfs sqlite3 sqlite3-doc dict system-config-printer-gnome \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4 megatools blueman
