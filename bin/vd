@@ -125,11 +125,8 @@ if ( scalar @videos ) {
 
 }
 
-if ( $time eq '' ) {
 
-    exit;
-
-} elsif ( $directory eq "/home/paul/Downloads" ) {
+if ( $directory eq "/home/paul/Downloads" ) {
 
     exec "ddl", $time;
 
