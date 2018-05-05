@@ -2,7 +2,7 @@
 
 if [ -z "$1" ]; then
        
-    echo "Need medication name."
+    printf "\nNeed medication name.\n\n"
     exit 1
 
 fi
