@@ -19,5 +19,8 @@ firefox pinfo hddtemp googler ddgr pdd python-pip vim-gtk herbstluftwm suckless-
 dex zathura zathura-ps a2ps fossil dwww rlwrap smartmontools sshfs sqlite3 sqlite3-doc dict system-config-printer-gnome \
 tcl8.6 tcllib tkinspect tcl8.6-doc tk8.6 tk8.6-doc tcl-tclreadline expect libsqlite3-tcl exim4 megatools blueman zenity
 
+a2enmod cgi
+
+systemctl restart apache2
 
 echo "Remember sudo dpkg-reconfigure exim4-config."
