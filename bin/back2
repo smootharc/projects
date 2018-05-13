@@ -5,4 +5,4 @@ if [ -z "$1" ]; then
     exit 1  
 fi
 
-cd && rsync -avr --delete --timeout=60 -f "exclude xfce4-power-manager.xml .debris" --files-from=.back2.lst --log-file=/tmp/back2.log . "$1":~/
+cd && rsync -avr --delete --timeout=60 -f "exclude xfce4-power-manager.xml" -f "exclude .debris/" --files-from=.back2.lst --log-file=/tmp/back2.log . "$1":~/
