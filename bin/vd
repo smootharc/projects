@@ -56,7 +56,7 @@ sub filesoftype
 
     }
 
-    @return = sort @return;
+    @return = sort {$b cmp $a} @return;
 
     s/.*\x00// for @return;
 
