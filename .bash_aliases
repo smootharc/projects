@@ -10,7 +10,7 @@ ulimit -s 65536
 
 hdf () {
 
-    df -h -T -x devtmpfs -x tmpfs -x squashfs
+    df -h -T -x devtmpfs -x tmpfs -x squashfs -x vfat
 
 }
 
@@ -40,17 +40,10 @@ now () {
 
 }
 
-hc () { 
-
-    herbstclient "$@"
-
-}
-
 export -f now
 export -f calc
 export -f hdu
 export -f hdf
-export -f hc
 export BROWSER=google-chrome-stable
 export INFO_PRINT_COMMAND="a2ps -s 2"
 export EDITOR=vim
@@ -64,11 +57,8 @@ export RLWRAP_HOME=$HOME/.local/share/rlwrap
 export RESTIC_PASSWORD_FILE=~/.config/restic/password
 export RESTIC_REPOSITORY=/backup/$USER
 
-
-alias keys='less /usr/include/X11/keysymdef.h'
 alias pics='feh -rqdFD -5 &>/dev/null'
 alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
 alias hds='udisksctl status'
 alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
-alias hlc='pushd ~/.config/herbstluftwm'
