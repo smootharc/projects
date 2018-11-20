@@ -3,7 +3,8 @@ shopt -s autocd
 shopt -s cdspell
 shopt -s extglob
 shopt -s nocaseglob
-set -o vi
+stty -ixon
+#set -o vi
 #set +H
 #shopt -s failglob
 ulimit -s 65536
