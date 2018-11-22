@@ -1,3 +1,0 @@
-#!/bin/sh
-
-perl -F, -e '@url = split "/", @F[0];printf "%02d %-50s %-30s %-30s\n", $., "@url[0]//@url[2]", @F[1], @F[2]' ~/Documents/lastpass.csv

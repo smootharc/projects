@@ -1,3 +1,0 @@
-#!/bin/sh
-
-cd && chronic rsync -avr --delete -f "exclude xfce4-power-manager.xml" --files-from=.back2ts.lst --log-file=/tmp/back2ts.log . paul@ts:~/

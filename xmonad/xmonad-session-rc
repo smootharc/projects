@@ -1,8 +1,0 @@
-dbus-launch
-light-locker &
-xfce4-power-manager &
-#udiskie &
-thunar --daemon &
-mega-sync &
-sabnzbdplus -b 0 -d
-feh --bg-fill ~/Pictures/xmonad.png
