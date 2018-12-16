@@ -63,3 +63,6 @@ alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
 alias hds='udisksctl status'
 alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
+
+[ -f /usr/share/fzf/key-bindings.bash ] && source /usr/share/fzf/key-bindings.bash
+[ -f /usr/share/fzf/completion.bash ] && source /usr/share/fzf/completion.bash
