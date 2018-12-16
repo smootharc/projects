@@ -7,4 +7,7 @@ if [ -z "$1" ]; then
 
 fi
 
-gcalcli --calendar Medical add --title "$1" --when "$(date --iso-8601=seconds)" --duration 1 --description "$2" 
+#gcalcli --calendar Medical add --title "$1" --when "$(date --iso-8601=seconds)" --duration 1 --description "$2" 
+
+#Use of now requires package python-parsedatetime.
+gcalcli --calendar Medical add --title "$1" --when now --duration 1 --description "$2" 
