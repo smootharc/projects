@@ -9,6 +9,27 @@ stty -ixon
 #shopt -s failglob
 ulimit -s 65536
 
+dan () {
+
+#-f "%a %b %d %T EST %Y"
+    
+    if datetime="$(dateadd -z EST now $1 2>/dev/null)"
+    then
+        echo ""
+        date
+        echo ""
+        cal
+        echo ""
+        date +"%a %b %d %T EST %Y" -d "$datetime"
+        echo ""
+        date="$(echo "$datetime" | cut -dT -f1)"
+        cal "$date"
+    else
+        printf "\n%s %s\n\n" "${FUNCNAME[0]}:" "Bad duration argument."
+    fi
+
+}
+
 hdf () {
 
     df -h -T -x devtmpfs -x tmpfs -x squashfs -x vfat
@@ -58,11 +79,12 @@ export RLWRAP_HOME=$HOME/.local/share/rlwrap
 export RESTIC_PASSWORD_FILE=~/.config/restic/password
 export RESTIC_REPOSITORY=/backup/$USER
 
-alias pics='feh -rqdFD -5 &>/dev/null'
+#alias pics='feh -rqdFD -5 &>/dev/null'
 alias weather='curl wttr.in/08096'
 alias meds='gcalcli --calendar Medical'
 alias hds='udisksctl status'
-alias unrardl='{ pushd ~/Downloads;unrar x -r -o- "*.rar";popd; }'
+alias unrardl='{ pushd ~/Downloads;unrar x -r -o- -p- "*.rar";popd; }'
+#alias dan='dateadd -z EST now'
 
 [ -f /usr/share/fzf/key-bindings.bash ] && source /usr/share/fzf/key-bindings.bash
 [ -f /usr/share/fzf/completion.bash ] && source /usr/share/fzf/completion.bash
