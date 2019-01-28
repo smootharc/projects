@@ -1,0 +1,65 @@
+#!/bin/sh
+
+help () {
+
+    cat << EOF
+
+Usage: sleepdelay [H]
+
+Set deepin line power sleep delay to H positive integer hours.
+
+H must be a number between 0 and 555555.
+
+No parameter will show current setting.
+
+EOF
+
+exit
+
+}
+
+getsleepdelay () {
+
+    let seconds=$(gsettings get com.deepin.dde.power line-power-sleep-delay)
+
+    let hours="$seconds"/3600
+
+    printf "\nDeepin line power sleep delay is now $hours hours.\n\n"    
+
+    exit
+    
+}
+
+if [ "$#" -eq 0 ]; then
+
+    getsleepdelay
+
+fi    
+
+if [ "$#" -gt 1 ] || [ "$1" = "-h" ]; then
+
+    help    
+
+fi    
+
+if numfmt -- "$1" > /dev/null 2>&1; then
+
+    hours="$(printf '%0.f' $1)"
+
+    let seconds="$hours"*3600
+
+    if gsettings set com.deepin.dde.power line-power-sleep-delay "$seconds" &> /dev/null; then
+
+        getsleepdelay
+
+    else
+
+        help
+        
+    fi
+
+else
+
+    help
+
+fi
