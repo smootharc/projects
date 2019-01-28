@@ -2,7 +2,7 @@
 
 if numfmt -- "$1" > /dev/null 2>&1; then
 
-    find ~/Downloads -type f -cmin +"$1" -delete 2> /dev/null
+    find ~/Downloads -mindepth 1 -cmin +"$1" -delete 2> /dev/null
 
 else
 
@@ -10,4 +10,4 @@ else
 
 fi
 
-find ~/Downloads -mindepth 1 -type d -empty -delete 2> /dev/null
+find ~/Downloads -mindepth 1 -empty -delete 2> /dev/null
