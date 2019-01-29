@@ -24,7 +24,8 @@ getsleepdelay () {
 
     let hours="$seconds"/3600
 
-    printf "\nDeepin line power sleep delay is now $hours hours.\n\n"    
+    echo "$hours"
+#    printf "\nDeepin line power sleep delay is now $hours hours.\n\n"    
 
     exit
     
