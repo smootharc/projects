@@ -57,11 +57,11 @@ if len(videos) > 0:
                 fd.write(v[0] + "\n")
         os.system(f'mpv --really-quiet {fd.name}')
 else:
-    print("No videos found!")
+    print('No videos found!')
 
 # if len(other) > 0:
 #     for f in other:
 #         if os.path.isfile(f):
 #             os.remove(f)
 
-os.system("ddl " + minutes)
+os.system(f'ddl {minutes}')
