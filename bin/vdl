@@ -1,34 +1,47 @@
 #!/bin/sh
 
+usage () 
+{
+        echo "Usage: vids OneValidDirectoryName"
+        exit 1
+}
+
 cleanup ()
 {
     test -f "$playlist" && rm "$playlist"
 }
 
-trap cleanup EXIT
+# if test -d "$1"; then
+#         dirname=$(realpath "$1")
+# else
+#         usage
+# fi
+
+# trap cleanup EXIT
 
 playlist="$(mktemp)"
 
-find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions image))$" -printf '%C@\0%p\n' | sort -g | cut -d '' -f 2 > "$playlist"
+find ~/Downloads -type f -printf '%C@\0%p\n' | sort -nr | cut -d '' -f 2 | file --mime-type -nNf - | grep 'image' | cut -d: -f 1 > "$playlist"
 
-if test -s "$playlist"; then
-
-    feh -D 3 -dqFf $playlist > /dev/null 2>&1
-
-else
+if ! feh -dqFf "$playlist" &> /dev/null; then
 
     echo "No images found!"
 
 fi
 
-find ~/Downloads -type f -regextype posix-extended -iregex ".*($(extensions video))$" -printf '%C@\0%p\n' | sort -g | cut -d '' -f 2 > "$playlist"
+playlist="$(mktemp)"
 
-if test -s "$playlist"; then
+#echo "#EXTM3U" > "$playlist"
 
+find ~/Downloads -type f -printf '%C@\0%p\n' | sort -nr | cut -d '' -f 2 | file --mime-type -nNf - | grep 'video' | cut -d: -f 1 >> "$playlist"
+
+if test -s "$playlist" ; then
+    
+#    sed -i '1s/^/EXTM3U/'
     mpv --really-quiet --playlist="$playlist"
 
 else
-
+    
     echo "No videos found!"
 
 fi
