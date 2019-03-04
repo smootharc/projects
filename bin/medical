@@ -1,5 +1,5 @@
 #!/bin/bash
-gcalcli --calendar Medical search --tsv --details description " " | egrep -iv "00:00.*00:00|doctor|blood|weight|alcohol|eye" \
+gcalcli --refresh --calendar Medical search --tsv --details description " " | egrep -iv "00:00.*00:00|doctor|blood|weight|alcohol|eye" \
 | cut --complement -f 3,4 | sed 's/\t/ /' | tr "\t" "|" | sed 's/|/:00|/' | nl -s"|" > /tmp/dose.dat
 
 cat /tmp/dose.dat | cut -d"|" -f 3 | sort | uniq | sed 's/$/|/'> /tmp/medication.dat

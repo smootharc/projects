@@ -40,7 +40,8 @@ for root,d_names,f_names in os.walk(path):
 
 if len(images) > 0:
     images.sort(key = lambda ctime: ctime[1], reverse = True)
-    with tempfile.NamedTemporaryFile() as tf:
+    with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8') as tf:
+    #with tempfile.NamedTemporaryFile() as tf:
         with open(tf.name, "w") as fd:
             for i in images:
                 fd.write(i[0] + "\n")
@@ -50,7 +51,8 @@ else:
 
 if len(videos) > 0:
     videos.sort(key = lambda ctime: ctime[1], reverse = True)
-    with tempfile.NamedTemporaryFile() as tf:
+    with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8') as tf:
+    #with tempfile.NamedTemporaryFile() as tf:
         with open(tf.name, "w") as fd:
             fd.write("#EXTM3U\n")
             for v in videos:
