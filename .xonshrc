@@ -1,0 +1,58 @@
+# vi:syntax=python
+
+import os
+import sqlite3
+from prompt_toolkit import prompt
+
+$AUTO_PUSHD = '0'
+$AUTO_SUGGEST_IN_COMPLETIONS = '1'
+$DOTGLOB = '1'
+$FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = '1'
+$SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
+$EDITOR = 'vim'
+$VISUAL = 'vim'
+$RESTIC_PASSWORD_FILE = $HOME + '/.config/restic/password'
+$RESTIC_REPOSITORY = '/backup/' + $USER
+$CDPATH = ['.','~','~/.config']
+$HISTCONTROL = 'ignoredups,ignoreerr'
+#$PAGER = 'most -s'
+#$XONSH_SHOW_TRACEBACK = True
+
+if 'SSH_TTY' in ${...}:
+    source-bash --login True "echo loading xonsh foreign shell"
+
+def say(something="Hello"):
+    print(something)
+
+def _hdt():
+    for d in g`/dev/sd?`: 
+        hddtemp @(d) 
+
+def _unrardl():
+    pushd ~/Downloads
+    unrar x -r -o- -p- "*.rar" 
+    popd
+
+def _dan(arg):
+    if arg:
+        echo
+        date
+        echo
+        cal
+        dateadd -z EST now @(arg) -f "%a %b %d %T EST %Y" 2>/dev/null
+        echo
+        cal @(f'+{arg[0]}')
+
+aliases['dan'] = _dan
+aliases['hdf'] = 'df -hT -x tmpfs -x vfat -x devtmpfs'
+aliases['hdt'] = _hdt
+aliases['meds'] = 'gcalcli --calendar Medical'
+aliases['hds'] = 'udisksctl status'
+aliases['unrardl'] = _unrardl
+aliases['weather'] = 'curl wttr.in/08096'
+aliases['hdu'] = 'udisksctl unmount -b'
+aliases['up'] = 'sudo pamac update'
+
+xontrib load jedi
+xontrib load prompt_ret_code
+xontrib load coreutils
