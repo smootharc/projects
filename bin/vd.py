@@ -7,14 +7,17 @@ import mimetypes
 import tempfile
 import argparse
 
-parser = argparse.ArgumentParser(description="View images and videos in ~/Downloads.")
+parser = argparse.ArgumentParser(description="View images and videos in Directory.")
 parser.add_argument("-m", type=int, help="Delete files older than M minutes.")
+parser.add_argument("Directory", nargs='?', default=os.path.expanduser("~/Downloads"), help="Directory to view.")
 args = parser.parse_args()
 
 minutes = str(args.m)
 #print(minutes)
 
-path = os.path.expanduser("~/Downloads")
+path = os.path.abspath(args.Directory)
+#print(path)
+#path = os.path.expanduser("~/Downloads")
     
 images = []
 
@@ -35,13 +38,10 @@ for root,d_names,f_names in os.walk(path):
                 videos.append((fullname, os.stat(fullname).st_ctime))
             if "image" in file_type[0]:
                 images.append((fullname, os.stat(fullname).st_ctime))
-        # else:
-        #      other.append(fullname)
 
 if len(images) > 0:
     images.sort(key = lambda ctime: ctime[1], reverse = True)
     with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8') as tf:
-    #with tempfile.NamedTemporaryFile() as tf:
         with open(tf.name, "w") as fd:
             for i in images:
                 fd.write(i[0] + "\n")
@@ -52,18 +52,12 @@ else:
 if len(videos) > 0:
     videos.sort(key = lambda ctime: ctime[1], reverse = True)
     with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8') as tf:
-    #with tempfile.NamedTemporaryFile() as tf:
         with open(tf.name, "w") as fd:
             fd.write("#EXTM3U\n")
             for v in videos:
                 fd.write(v[0] + "\n")
-        os.system(f'mpv --really-quiet {fd.name}')
+        os.system(f'mpv {fd.name}')
 else:
     print('No videos found!')
-
-# if len(other) > 0:
-#     for f in other:
-#         if os.path.isfile(f):
-#             os.remove(f)
 
 os.system(f'ddl {minutes}')
