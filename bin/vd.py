@@ -8,11 +8,14 @@ import tempfile
 import argparse
 
 parser = argparse.ArgumentParser(description="View images and videos in Directory.")
-parser.add_argument("-m", type=int, help="Delete files older than M minutes.")
+parser.add_argument("-m", type=int, nargs='?', const=-1, help="Delete files older than M minutes for M >= 0.")
 parser.add_argument("Directory", nargs='?', default=os.path.expanduser("~/Downloads"), help="Directory to view.")
 args = parser.parse_args()
 
-minutes = str(args.m)
+if args.m:
+    minutes = args.m
+else:
+    minutes = -1
 #print(minutes)
 
 path = os.path.abspath(args.Directory)
@@ -44,7 +47,11 @@ if len(images) > 0:
     with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8') as tf:
         with open(tf.name, "w") as fd:
             for i in images:
-                fd.write(i[0] + "\n")
+                try:
+                    fd.write(i[0] + "\n")
+                except UnicodeError:
+                    continue
+ 
         os.system(f'feh -dqFf {fd.name}')
 else:
     print("No images found!")
@@ -55,9 +62,15 @@ if len(videos) > 0:
         with open(tf.name, "w") as fd:
             fd.write("#EXTM3U\n")
             for v in videos:
-                fd.write(v[0] + "\n")
+                try:
+                    fd.write(v[0] + "\n")
+                except UnicodeError:
+                    continue
+
         os.system(f'mpv {fd.name}')
 else:
     print('No videos found!')
 
-os.system(f'ddl {minutes}')
+if minutes >= 0:
+    os.system(f'ddl {minutes}')
+
