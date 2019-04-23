@@ -62,6 +62,7 @@ now () {
 
 }
 
+#export -f dan
 export -f now
 export -f calc
 export -f hdu
