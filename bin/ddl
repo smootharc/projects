@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
-if numfmt -- "$1" > /dev/null 2>&1; then
+if [[ $1 =~ ^[[:digit:]]+$ ]]; then
 
     find ~/Downloads -mindepth 1 -cmin +"$1" -delete 2> /dev/null
 
 else
 
-    echo "No or non-numeric time specified.  No files deleted."			
+    echo -e "\nUsage: $(basename $0) M\n\nM must be an integer greater than or equal to zero.  No files deleted.\n"			
 
 fi
 
