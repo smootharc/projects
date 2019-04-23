@@ -259,13 +259,14 @@ proc edit { id } {
  
 proc count { medication starttime endtime } { 
   
-    set medcount [db eval "select count(*) from medication where name like '%$medication%'"]
+    set medcount [db eval "select count(*) from medication where upper(name) = upper('$medication')"]
+    #set medcount [db eval "select count(*) from medication where name like '%$medication%'"]
 
     switch $medcount {
 
         1 {
                         
-            set medication [db onecolumn "select name from medication where name like '%$medication%'"]
+            set medication [db onecolumn "select name from medication where upper(name) = upper('$medication')"]
     
         }
 
@@ -317,7 +318,7 @@ proc medications {} {
 
     puts ""
 
-    db eval { select rowid, name from medication order by name } {
+    db eval { select rowid, name from medication order by rowid } {
 
     puts "$rowid $name"
 
