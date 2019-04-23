@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Getopt::Long;
 use File::Temp;
 use File::MimeInfo;
 use File::stat;
