@@ -8,25 +8,15 @@ import tempfile
 import argparse
 
 parser = argparse.ArgumentParser(description="View images and videos in Directory.")
-parser.add_argument("-m", type=int, nargs='?', const=-1, help="Delete files older than M minutes for M >= 0.")
+parser.add_argument("-m", type=int, nargs='?', default=-1, help="Delete files older than M minutes for M >= 0.")
 parser.add_argument("Directory", nargs='?', default=os.path.expanduser("~/Downloads"), help="Directory to view.")
 args = parser.parse_args()
 
-if args.m:
-    minutes = args.m
-else:
-    minutes = -1
-#print(minutes)
-
 path = os.path.abspath(args.Directory)
-#print(path)
-#path = os.path.expanduser("~/Downloads")
-    
+
 images = []
 
 videos = []
-
-other = []
 
 folders = []
 
@@ -71,6 +61,7 @@ if len(videos) > 0:
 else:
     print('No videos found!')
 
-if minutes >= 0:
+if args.m >= 0:
     os.system(f'ddl {minutes}')
-
+else:
+    os.system(f'ddl')
