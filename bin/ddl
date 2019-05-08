@@ -1,13 +1,33 @@
 #!/bin/bash
 
-if [[ $1 =~ ^[[:digit:]]+$ ]]; then
+t="$1"
 
-    find ~/Downloads -mindepth 1 -cmin +"$1" -delete 2> /dev/null
+rmempty() {
+
+    find ~/Downloads -mindepth 1 -empty -delete 2> /dev/null
+
+}
+
+help() {
+
+    echo -e "\nUsage: $(basename $0) M\n\nM must be an integer greater than or equal to zero.  No files deleted.\n"			
+    exit "$1"
+    
+}
+
+trap rmempty EXIT
+
+[[ $# -eq 0 ]] && exit 0
+
+[[ $t == "-h" ]] && help 0
+
+if [[ $t =~ ^[[:digit:]]+$ ]]; then
+
+    find ~/Downloads -mindepth 1 -cmin +"$t" -delete 2> /dev/null
 
 else
 
-    echo -e "\nUsage: $(basename $0) M\n\nM must be an integer greater than or equal to zero.  No files deleted.\n"			
+    help 1
 
 fi
 
-find ~/Downloads -mindepth 1 -empty -delete 2> /dev/null
