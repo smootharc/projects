@@ -14,13 +14,14 @@ create table medication (
 
 create table dose (
     "id" integer primary key not null,
-    "datetime" integer not null default (datetime(CURRENT_TIMESTAMP,'localtime')),
+    "datetime" integer not null default (datetime(CURRENT_TIMESTAMP,'localtime')) check (datetime(datetime) is not null),
     "name" text not null references medication(name),
-    "comment" text
+    "comment" text not null default ''
 );
 
 
-create virtual table doseft using fts4(content="dose", name, comment);
+--create virtual table doseft using fts4(content="dose", name, comment);
+create virtual table doseft using fts5(docid, name, comment);
 
 create trigger dose_after_insert after insert on dose
 begin
