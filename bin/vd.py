@@ -62,6 +62,6 @@ else:
     print('No videos found!')
 
 if args.m >= 0:
-    os.system(f'ddl {minutes}')
+    os.system(f'ddl {args.m}')
 else:
     os.system(f'ddl')
