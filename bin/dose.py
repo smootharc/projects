@@ -15,8 +15,8 @@ db.execute("pragma foreign_keys = on")
 
 db.row_factory = sqlite3.Row
 
-def print_rows(rows):
-    
+def list_rows(rows):
+
     last_date = None
 
     rows_to_print = []
@@ -36,8 +36,6 @@ def print_rows(rows):
             rows_to_print.append([""])
 
         rows_to_print.append([date, row['time'], row['id'], row['name'], row['comment']])
-  
-    rows_to_print.append([""])
 
     #click.echo(tabulate.tabulate(rows_to_print, tablefmt="plain"))
     print(tabulate.tabulate(rows_to_print, tablefmt="plain"))
@@ -45,16 +43,19 @@ def print_rows(rows):
 @click.group()
 #@click.pass_context
 def dose():
+    
+    '''Record medication doses.
+    '''
     pass
-#    ctx.ensure_object(dict)
-#    click.echo(ctx.invoked_subcommand)
 
 @dose.command()
-@click.argument('medication')
-@click.argument('date', required=False, type=click.DateTime())
+@click.argument('name')
+@click.argument('date', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']))
 @click.option('--comment', "-c")
 #@click.argument('comment', required=False)
-def add(medication, date, comment):
+def add(name, date, comment):
+
+    '''Add a dose with an optional comment.  If no date is given now will be used.'''
 
     if date == None:
 
@@ -72,32 +73,34 @@ def add(medication, date, comment):
 
             cursor = db.cursor()
 
-            cursor.execute(sql,(medication, date, comment))
+            cursor.execute(sql,(name, date, comment))
 
-            click.echo(f"\nAddition succeeded.  Dose id is {cursor.lastrowid}\n")
+            click.echo(f"Addition of dose {cursor.lastrowid} succeeded.")
 
     except sqlite3.Error as e:
 
-        click.echo(f'\nDatabase error: {e}\n')
+        click.echo(f'Dose addition: {e}')
 
 
 @dose.command()
 @click.argument('id', type=int)
-def edit(id):
+def update(id):
 
-    sql = '''select name, datetime, comment from dose where id = ?'''
+    '''Update a dose.'''
+
+    sql = '''select name, strftime('%Y-%m-%d %H:%M',datetime), comment from dose where id = ?'''
 
     dose = db.execute(sql, (id,)).fetchone()
     
     if not dose:
 
-        print(f"\nDose {id} not found.\n")
+        print(f"Dose {id} not found.")
 
         exit(1)
         
     ( name, datetime, comment ) = dose
     
-    click.echo(f"Editing dose {id}")
+    click.echo(f"Updating dose {id}:")
 
     name = prompt("Name: ", default=name)
 
@@ -115,9 +118,12 @@ def edit(id):
                 
     except sqlite3.Error as e:
 
-        click.echo(f'Record edit failed {e}')
-        
-    click.echo("Record edit succeeded.")
+        click.echo(f'Update dose: {e}')
+    
+        exit(1)
+
+    click.echo(f'Update of dose {id} succeeded.')
+       
 
 @dose.command()
 @click.argument('id', type=int)
@@ -137,11 +143,11 @@ def remove(id):
 
             if deleted.rowcount == 0:
 
-                click.echo(f"\nRemoval of Dose {id} failed.\n")
+                click.echo(f"Removal of dose {id} failed.")
 
             else:
 
-                click.echo(f'\nRemoval of Dose {id} succeeded.\n')                   
+                click.echo(f'Removal of dose {id} succeeded.')               
 
     except sqlite3.Error as e:
 
@@ -152,12 +158,16 @@ def remove(id):
 
 @dose.command()
 @click.argument('search_string')
-@click.argument('start_time', required=False, type=click.DateTime())
-@click.argument('end_time', required=False  , type=click.DateTime())
+@click.argument('start_time', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']))
+@click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']))
 #@click.pass_context
 def search(search_string, start_time, end_time):
 
-    """Case insensitive search of dose names and comments."""
+    """Case insensitive search of dose names and comments between two date-times.  
+
+    Start time defaults to 1 year ago end time defaults to now. 
+    The search string may contain the operators *, (), AND, OR and NOT.
+    """
 
     if start_time is None:
 
@@ -167,7 +177,7 @@ def search(search_string, start_time, end_time):
 
         end_time = datetime.datetime.now()
     
-    sql = '''select date(datetime) as date, time(datetime) as time, id, name, comment from dose 
+    sql = '''select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose 
             where id in ( select docid from doseft where doseft match ? ) 
             and datetime between ? and ? order by datetime'''
 
@@ -176,24 +186,25 @@ def search(search_string, start_time, end_time):
         search_result = db.execute(sql, (search_string, start_time, end_time)).fetchall()
     
     except sqlite3.OperationalError:
-        print(f"\nUse only AND, OR NOT and parentheses in the search string.\n")
-        exit(1)
 
+        print(f"Use only AND, OR, NOT, * and () in the search string.")
+
+        exit(1)
 
     if len(search_result) > 0:
 
-        print_rows(search_result)
+        list_rows(search_result)
 
     else:
 
-        click.echo(f"\nNone found.\n")
+        click.echo(f"None found.")
         
 
 @dose.command()
-@click.argument('medication')
-@click.argument('start_time', required=False, type=click.DateTime())
-@click.argument('end_time', required=False, type=click.DateTime())
-def count(medication, start_time, end_time):
+@click.argument('name')
+@click.argument('start_time', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']))
+@click.argument('end_time', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']))
+def count(name, start_time, end_time):
 
     '''Some stats regarding doses between two dates.  Defaults to last 30 days.'''
 
@@ -211,37 +222,36 @@ def count(medication, start_time, end_time):
 
     if days <= 0:
         
-        click.echo("\nStart time is later than end time.\n")
+        click.echo("Start time is later than end time.")
 
         exit(1)
 
     sql = '''select count(*) as count from dose where name = ? and datetime between ? and ?'''
     
-    doses = db.execute(sql, (medication, start_time, end_time)).fetchone()["count"]
+    doses = db.execute(sql, (name, start_time, end_time)).fetchone()["count"]
 
     if doses == 0:
 
-        click.echo(f'\nMedication {medication} not found.\n')
+        click.echo(f'Name {name} not found.')
+
         exit(1)
     
     dosespd = doses/days
     
-    click.echo('')
-    click.echo(f'Medication: {medication}')
+    click.echo(f'      Name: {name}')
     click.echo(f'      From: {start_time.isoformat(sep=" " , timespec="minutes")}')
     click.echo(f'        To: {end_time.isoformat(sep= " ", timespec="minutes")}')
     click.echo(f'     Doses: {doses}')
     click.echo(f'      Days: {days:.2f}')
     click.echo(f' Doses/Day: {dosespd:.2f}')
-    click.echo('')
     
 
 @dose.command()
-@click.argument('start_time', required=False, type=click.DateTime())
-@click.argument('end_time', required=False  , type=click.DateTime())
+@click.argument('start_time', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H-%M']))
+@click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H-%M']))
 def list(start_time, end_time):
 
-    '''Print all doses between two dates.  Defaults to last 52 weeks.'''
+    '''List all doses between two dates.  Defaults to last 52 weeks.'''
 
     if start_time is None:
 
@@ -251,46 +261,47 @@ def list(start_time, end_time):
 
         end_time = datetime.datetime.now()
     
-    sql = '''select date(datetime) as date, time(datetime) as time, id, name, comment from dose
+    sql = '''select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose
              where datetime between ? and ? order by datetime'''
 
     search_result = db.execute(sql, (start_time, end_time)).fetchall()
 
     if len(search_result) > 0:
 
-        print_rows(search_result)
+        list_rows(search_result)
 
     else:
         
         click.echo("None found.")
 
 
+def list_medications():
+
+        meds = db.execute("select * from medication")
+        
+        print(tabulate.tabulate(meds, tablefmt='simple', headers=['Name', 'Comment']))
+
 
 @dose.command()
 # @click.option("--comment", "-c", nargs=1, default='')
-@click.option('--add', '-a', is_flag=True)
+@click.option('--add', '-a', prompt='is_flag')
 def medications(add):
 
-    '''List medications or add one.
+    '''List medications or if -a add one.
     
-       This will prompt for the medication name and comment.'''
+       Option -a, --add Will prompt for the medication name and comment.'''
 
     if not add:
 
-        meds = db.execute("select * from medication")
-
-        print("")
-        
-        print(tabulate.tabulate(meds, tablefmt='plain'))
-
-        print("")
+        list_medications()
 
     else:
+
         medication = prompt("Enter the medication name: ")
 
         if medication == '':
 
-            click.echo("\nMust enter a something.\n")
+            click.echo("Must enter a something.")
 
             exit(1)
 
@@ -303,20 +314,19 @@ def medications(add):
 
                 db.execute(sql, (medication, comment ))
 
-                click.echo(f'Added {medication} to medication table')
-
         except sqlite3.IntegrityError as e:
 
-            click.echo(f'\nMedication already exists.\n')
+            click.echo(f'Medication already exists.')
 
             exit(1)
 
         except sqlite3.Error as e:
 
-            click.echo(f'\nFailed to add medication: {e}\n')
+            click.echo(f'Failed to add medication: {e}')
 
             exit(1)        
 
+        click.echo(f'Added {medication} to medication table')
 if __name__ == '__main__':
     dose()
 #    dose(obj={})
