@@ -5,4 +5,4 @@ if [ -z "$1" ]; then
     exit 1  
 fi
 
-cd && rsync -avr --delete --timeout=60 --files-from=.config/rsync/from-home . "$1":~/
+cd && rsync -arP --delete --timeout=60 --exclude 'watch_later/*' --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
