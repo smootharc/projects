@@ -6,9 +6,7 @@ help () {
 
 Usage: $(basename $0) [H]
 
-Set deepin line power screen black delay to H positive integer hours.
-
-H must be a number between 0 and 555555.
+Set deepin line power screen black delay to H positive integer minutes.
 
 No parameter will show current setting.
 
@@ -22,9 +20,9 @@ getdelay () {
 
     let seconds=$(gsettings get com.deepin.dde.power line-power-screen-black-delay)
 
-    let hours="$seconds"/3600
+    let minutes="$seconds"/60
 
-    echo "$hours"
+    echo "$minutes"
 
     exit
     
@@ -44,9 +42,9 @@ fi
 
 if numfmt -- "$1" > /dev/null 2>&1; then
 
-    hours="$(printf '%0.f' $1)"
+    minutes="$(printf '%0.f' $1)"
 
-    let seconds="$hours"*3600
+    let seconds="$minutes"*60
 
     if gsettings set com.deepin.dde.power line-power-screen-black-delay "$seconds" &> /dev/null; then
 
