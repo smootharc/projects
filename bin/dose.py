@@ -3,7 +3,7 @@
 import click
 import sqlite3
 import os
-import datetime
+import datetime as dt
 import tabulate
 from prompt_toolkit import prompt
 
@@ -51,13 +51,13 @@ def dose():
 @click.argument('datetime', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[DATE_TIME]')
 @click.option('--comment', "-c")
 #@click.argument('comment', required=False)
-def add(name, datetime, comment):
+def insert(name, datetime, comment):
 
     '''Add a dose with an optional comment.  If no date-time is given now will be used.'''
 
     if datetime == None:
 
-        datetime = datetime.datetime.now()
+        datetime = dt.datetime.now()
     
     if comment == None:
 
@@ -168,11 +168,11 @@ def search(search_string, start_time, end_time):
 
     if start_time is None:
 
-        start_time = datetime.datetime.now() - datetime.timedelta(weeks=52)
+        start_time = dt.datetime.now() - dt.timedelta(weeks=52)
 
     if end_time is None:
 
-        end_time = datetime.datetime.now()
+        end_time = dt.datetime.now()
     
     sql = '''select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose 
             where id in ( select docid from doseft where doseft match ? ) 
@@ -207,11 +207,11 @@ def count(name, start_time, end_time):
 
     if start_time == None:
 
-        start_time = datetime.datetime.now() - datetime.timedelta(days=30)
+        start_time = dt.datetime.now() - dt.timedelta(days=30)
 
     if end_time == None:
 
-        end_time = datetime.datetime.now()
+        end_time = dt.datetime.now()
     
     seconds = (end_time - start_time).total_seconds()
     
@@ -252,11 +252,11 @@ def list(start_time, end_time):
 
     if start_time is None:
 
-        start_time = datetime.datetime.now() - datetime.timedelta(weeks=52)
+        start_time = dt.datetime.now() - dt.timedelta(weeks=52)
 
     if end_time is None:
 
-        end_time = datetime.datetime.now()
+        end_time = dt.datetime.now()
     
     sql = '''select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose
              where datetime between ? and ? order by datetime'''
