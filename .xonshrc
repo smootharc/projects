@@ -40,5 +40,8 @@ aliases['hds'] = 'udisksctl status'
 aliases['we'] = 'curl wttr.in/08096'
 aliases['hdu'] = 'udisksctl unmount -b'
 aliases['up'] = 'pamac update'
+aliases['scu'] = 'systemctl --user'
+aliases['jcu'] = 'journalctl --user'
+aliases['date'] = 'date -R'
 
 xontrib jedi prompt_ret_code
