@@ -2,28 +2,30 @@
 
 $XONSH_SHOW_TRACEBACK = True
 
-import os
+import subprocess
 import sqlite3
 from prompt_toolkit import prompt
+
+if 'SSH_TTY' in ${...}:
+    source-bash --login True --overwrite-aliases "echo loading xonsh foreign shell"
+#    source-bash --login True "echo loading xonsh foreign shell"
+#    $PATH.insert(0,'~/.local/bin')
+#    $PATH.insert(0,'~/bin')
 
 $AUTO_PUSHD = '0'
 $AUTO_SUGGEST_IN_COMPLETIONS = '1'
 $AUTO_SUGGEST = '1'
 $DOTGLOB = '1'
-$FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = '1'
+$FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = '0'
 $SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
 $EDITOR = 'vim'
 $VISUAL = 'vim'
 $RESTIC_PASSWORD_FILE = $HOME + '/.config/restic/password'
 $RESTIC_REPOSITORY = '/backup/' + $USER
-$CDPATH = ['.','~','~/.config']
+$CDPATH = ['.','~','~/.config','~/.config/systemd']
 $HISTCONTROL = 'ignoredups,ignoreerr'
 #$PAGER = 'most -s'
 
-if 'SSH_TTY' in ${...}:
-    source-bash --login True "echo loading xonsh foreign shell"
-#    $PATH.insert(0,'~/.local/bin')
-#    $PATH.insert(0,'~/bin')
 
 def say(something="Hello"):
     print(something)
