@@ -22,8 +22,6 @@ try:
 
     db = sqlite3.connect(str(dbfile))
 
-    # print(dbfile)
-
 except sqlite3.OperationalError as e:
 
     click.echo(f'{str(e).capitalize()}: {dbfile}')
