@@ -2,14 +2,34 @@
 
 import click
 import sqlite3
-import os
+from pathlib import Path
 import datetime as dt
 import tabulate
 from prompt_toolkit import prompt
+#import configparser as cp
 
-dbfile = os.path.expanduser("~/Documents/.medical.db")
+try:
 
-db = sqlite3.connect(dbfile)
+    programdir = Path(__file__).parent.resolve()
+    
+    if 'projects' in str(programdir):
+
+        dbfile = Path().home() / 'projects' / '.local' / 'share' / 'medical.db'
+    
+    else:
+
+        dbfile = Path().home() / '.local' / 'share' / 'medical.db'
+
+    db = sqlite3.connect(str(dbfile))
+
+    # print(dbfile)
+
+except sqlite3.OperationalError as e:
+
+    click.echo(f'{str(e).capitalize()}: {dbfile}')
+
+    exit(1)
+
 
 db.execute("pragma foreign_keys = on")
 
@@ -53,7 +73,7 @@ def dose():
 #@click.argument('comment', required=False)
 def insert(name, datetime, comment):
 
-    '''Add a dose with an optional comment.  If no date-time is given now will be used.'''
+    '''Insert a dose with 'NAME' and san optional comment.  If no date-time is given now will be used.'''
 
     if datetime == None:
 
@@ -73,18 +93,26 @@ def insert(name, datetime, comment):
 
             cursor.execute(sql,(name, datetime, comment))
 
-            click.echo(f"Addition of dose {cursor.lastrowid} succeeded.")
+            click.echo(f"Insertion of dose {cursor.lastrowid} succeeded.")
 
     except sqlite3.Error as e:
 
-        click.echo(f'Dose addition: {e}')
+        if 'FOREIGN' in e.args[0]:
+
+            click.echo(f"Medication '{name}' does not exist.")
+
+        else:
+
+            click.echo(f'Dose insertion {e}')
+        
+        exit(1)
 
 
 @dose.command()
 @click.argument('id', type=int)
 def update(id):
 
-    '''Update a dose.'''
+    '''Update the dose with the given ID.'''
 
     sql = '''select name, strftime('%Y-%m-%d %H:%M',datetime), comment from dose where id = ?'''
 
@@ -127,7 +155,7 @@ def update(id):
 @click.argument('id', type=int)
 def delete(id):
 
-    '''Delete a dose.'''
+    '''Delete the dose with the given ID'''
 
     sql = 'delete from dose where id = ?'
 
@@ -141,11 +169,13 @@ def delete(id):
 
             if deleted.rowcount == 0:
 
-                click.echo(f"Removal of dose {id} failed.")
+                click.echo(f"Deletion of dose {id} failed.")
+
+                exit(1)
 
             else:
 
-                click.echo(f'Removal of dose {id} succeeded.')               
+                click.echo(f'Deletion of dose {id} succeeded.')               
 
     except sqlite3.Error as e:
 
@@ -162,7 +192,7 @@ def delete(id):
 def search(search_string, start_time, end_time):
 
     """Case insensitive search of dose names and comments between two date-times.  
-    The search string may contain the operators *, (), AND, OR and NOT.  Start time defaults to 
+    The search string may contain the operators *, (), AND, OR and NOT.  Start time defaults to
     1 year ago. End time defaults to now.    
     """
 
@@ -229,7 +259,7 @@ def count(name, start_time, end_time):
 
     if doses == 0:
 
-        click.echo(f'Name {name} not found.')
+        click.echo(f"Dose named '{name}' not found.")
 
         exit(1)
     
