@@ -55,14 +55,14 @@ def list_rows(rows):
 
         rows_to_print.append([date, row['time'], row['id'], row['name'], row['comment']])
 
-    #click.echo(tabulate.tabulate(rows_to_print, tablefmt="plain"))
-    print(tabulate.tabulate(rows_to_print, tablefmt="plain"))
+    click.echo(tabulate.tabulate(rows_to_print, tablefmt="plain"))
+    #print(tabulate.tabulate(rows_to_print, tablefmt="plain"))
 
 @click.group()
 #@click.pass_context
 def dose():
     
-    '''Maintain a medication dose database. All date time formats are %Y-%m-%d' or '%Y-%m-%d %H:%M.'''
+    '''Maintain a medication dose database. All date time formats are %Y-%m-%d or %Y-%m-%d %H:%M.'''
 
 @dose.command()
 @click.argument('name')
@@ -71,7 +71,7 @@ def dose():
 #@click.argument('comment', required=False)
 def insert(name, datetime, comment):
 
-    '''Insert a dose with 'NAME' and san optional comment.  If no date-time is given now will be used.'''
+    '''Insert a dose with NAME and an optional comment.  If no DATE_TIME is given now will be used.'''
 
     if datetime == None:
 
@@ -118,7 +118,7 @@ def update(id):
     
     if not dose:
 
-        print(f"Dose {id} not found.")
+        click.echo(f"Dose {id} not found.")
 
         exit(1)
         
@@ -153,7 +153,7 @@ def update(id):
 @click.argument('id', type=int)
 def delete(id):
 
-    '''Delete the dose with the given ID'''
+    '''Delete the dose with the given ID.'''
 
     sql = 'delete from dose where id = ?'
 
@@ -189,8 +189,8 @@ def delete(id):
 #@click.pass_context
 def search(search_string, start_time, end_time):
 
-    """Case insensitive search of dose names and comments between two date-times.  
-    The search string may contain the operators *, (), AND, OR and NOT.  Start time defaults to
+    """Case insensitive search of dose names and comments between START_TIME and END_TIME. 
+    SEARCH_STRING may contain the operators *, (), AND, OR and NOT.  Start time defaults to
     1 year ago. End time defaults to now.    
     """
 
@@ -212,7 +212,7 @@ def search(search_string, start_time, end_time):
     
     except sqlite3.OperationalError:
 
-        print(f"Use only AND, OR, NOT, * and () in the search string.")
+        click.echo(f"Use only AND, OR, NOT, * and () in the search string.")
 
         exit(1)
 
@@ -276,7 +276,7 @@ def count(name, start_time, end_time):
 @click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[END_TIME]')
 def list(start_time, end_time):
 
-    '''List all doses between two dates.  Defaults to last 52 weeks.'''
+    '''List all doses between START_TIME and END_TIME.  Defaults to last 52 weeks.'''
 
     if start_time is None:
 
