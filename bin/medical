@@ -1,6 +1,16 @@
 #!/bin/bash
-gcalcli --refresh --calendar Medical search --tsv --details description " " | egrep -iv "00:00.*00:00|doctor|blood|weight|alcohol|eye|fast" \
-| cut --complement -f 3,4 | sed 's/\t/ /' | tr "\t" "|" | sed 's/|/:00|/' | nl -s"|" > /tmp/dose.dat
+if gcalcli --calendar Medical search --tsv --details description " " > /tmp/cal.dat;then
+
+    cat /tmp/cal.dat | egrep -iv "00:00.*00:00|doctor|blood|weight|alcohol|eye|fast" \
+    | cut --complement -f 3,4 | sed 's/\t/ /' | tr "\t" "|" | sed 's/|/:00|/' | nl -s"|" > /tmp/dose.dat
+
+else
+
+    echo "Gcalcli could not retrieve calendar data."
+    exit 1
+
+fi
+
 
 cat /tmp/dose.dat | cut -d"|" -f 3 | sort | uniq | sed 's/$/|/'> /tmp/medication.dat
 #sqlite3 ~/Documents/.medical.db < ~/bin/medical.sql
