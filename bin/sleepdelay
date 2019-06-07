@@ -4,7 +4,7 @@ help () {
 
     cat << EOF
 
-Usage: $(basename $0) [H]
+Usage: $(basename "$0") [H]
 
 Set deepin line power sleep delay to H positive integer minutes.
 
@@ -18,9 +18,11 @@ exit
 
 getsleepdelay () {
 
-    let seconds=$(gsettings get com.deepin.dde.power line-power-sleep-delay)
+    (( seconds=$(gsettings get com.deepin.dde.power line-power-sleep-delay) ))
+    #let seconds=$(gsettings get com.deepin.dde.power line-power-sleep-delay)
 
-    let minutes="$seconds"/60
+    (( minutes="$seconds"/60 ))
+    #let minutes="$seconds"/60
 
     echo "$minutes"
 #    printf "\nDeepin line power sleep delay is now $minutes minutes.\n\n"    
@@ -43,9 +45,10 @@ fi
 
 if numfmt -- "$1" > /dev/null 2>&1; then
 
-    minutes="$(printf '%0.f' $1)"
+    minutes=$(printf '%0.f' "$1")
 
-    let seconds="$minutes"*60
+    (( seconds="$minutes"*60 ))
+    #let seconds="$minutes"*60
 
     if gsettings set com.deepin.dde.power line-power-sleep-delay "$seconds" &> /dev/null; then
 
