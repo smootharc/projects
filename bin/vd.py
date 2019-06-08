@@ -63,5 +63,5 @@ else:
 
 if args.m >= 0:
     os.system(f'ddl {args.m}')
-else:
-    os.system(f'ddl')
+#else:
+#    os.system(f'ddl')
