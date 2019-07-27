@@ -5,4 +5,6 @@ if [ -z "$1" ]; then
     exit 1  
 fi
 
-cd && rsync -arP --delete --timeout=60 --exclude 'watch_later/*' --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
+#cd && rsync -arP --delete --timeout=60 --exclude 'bin/dose' --exclude 'bin/dosenow' --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
+#cd && rsync -arP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
+cd && rsync -arP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --files-from=.config/rsync/from-home ~ "$1"::paul
