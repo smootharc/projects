@@ -1,6 +1,8 @@
 #!/bin/env xonsh
 
-import sys
+# vi:syntax=python
+
+import os
 import tempfile
 import click
 import mimetypes
@@ -14,7 +16,7 @@ from pathlib import Path
 
 @click.option('-d', '--directory', default=Path('~/Downloads').expanduser(), type=click.Path(exists=True), show_default=True, help='Directory to search.' )
 
-@click.option('-f', '--files', required=False, default='.', show_default=True, help='Return absolute pathnames matching regex TEXT.')
+@click.option('-f', '--files', required=False, default='.', show_default=True, help='Return absolute pathnames matching the regex TEXT.')
 
 #@click.option('-d', '--directory', show_default=True )
 #@click.argument('directory', required=False, nargs=1, default='~/Downloads')
@@ -25,7 +27,7 @@ def main(minutes, files, directory, nosort):
 
     '''Display images and videos from a directory that have absolutes pathnames matching some regex.  Normally sorted newest to oldest.'''
         
-    files = [file.strip() for file in !(fd -a -p -t f @(files) @(Path(directory).expanduser()) )]
+    files = [file.strip() for file in !(fd -E _unpack -a -p -t f @(files) @(Path(directory).expanduser()) )]
         
     videos = []
 
@@ -33,19 +35,27 @@ def main(minutes, files, directory, nosort):
 
     mimetypes.init
 
+
     for file in files:
         
-        mime_type = mimetypes.guess_type(file)[0]
+        try:
 
-        if mime_type is not None:
+            mime_type = mimetypes.guess_type(file)[0]
 
-            if 'video' in mime_type:
+            if mime_type is not None:
 
-                videos.append((file, Path(file).stat().st_ctime))
+                if 'video' in mime_type:
 
-            if 'image' in mime_type:
+                    videos.append((file, Path(file).stat().st_ctime))
+
+                if 'image' in mime_type:
                 
-                images.append((file, Path(file).stat().st_ctime))
+                    images.append((file, Path(file).stat().st_ctime))
+
+        except FileNotFoundError as e:
+
+            click.echo(e)
+
 
     if len(images) > 0:
         if not nosort:
