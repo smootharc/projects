@@ -1,22 +1,16 @@
 # vi:syntax=python
 
-$XONSH_SHOW_TRACEBACK = True
+$XONSH_SHOW_TRACEBACK = False
+$XONSH_TRACEBACK_LOGFILE = "/home/paul/.xonsh.log"
 
-import subprocess
 import sqlite3
 from prompt_toolkit import prompt
-
-if 'SSH_TTY' in ${...}:
-    source-bash --login True --overwrite-aliases "echo loading xonsh foreign shell"
-#    source-bash --login True "echo loading xonsh foreign shell"
-#    $PATH.insert(0,'~/.local/bin')
-#    $PATH.insert(0,'~/bin')
 
 $AUTO_PUSHD = '0'
 $AUTO_SUGGEST_IN_COMPLETIONS = '1'
 $AUTO_SUGGEST = '1'
 $DOTGLOB = '1'
-$FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = '0'
+$FOREIGN_ALIASES_SUPPRESS_SKIP_MESSAGE = "True"
 $SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
 $EDITOR = 'vim'
 $VISUAL = 'vim'
@@ -35,13 +29,27 @@ def _hdt():
         hddtemp @(d) 
 
 aliases['hdt'] = _hdt
-aliases['meds'] = 'gcalcli --calendar Medical'
+aliases['meds'] = 'gcalcli --lineart unicode --calendar Medical'
 aliases['hds'] = 'udisksctl status'
 aliases['we'] = 'curl wttr.in/08096'
 aliases['hdu'] = 'udisksctl unmount -b'
 aliases['up'] = 'pamac update'
 aliases['scu'] = 'systemctl --user'
 aliases['jcu'] = 'journalctl --user'
+aliases['sc'] = 'systemctl'
+aliases['jc'] = 'journalctl'
 aliases['date'] = 'date -R'
+aliases['inxi'] = 'sudo inxi'
 
-xontrib jedi prompt_ret_code
+xontrib jedi prompt_ret_code vox bashisms
+# XONSH WIZARD START
+#source-bash --sourcer source "echo loading xonsh foreign shell"
+# XONSH WIZARD END
+
+#source-bash /etc/profile --suppress-skip-message
+if '/home/paul/bin' not in $PATH:
+    source-bash -l True ""
+#    source-bash --login True "echo loading xonsh foreign shell"
+#    source-bash --login True "echo loading xonsh foreign shell"
+#    $PATH.insert(0,'~/.local/bin')
+#    $PATH.insert(0,'~/bin')
