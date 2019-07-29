@@ -19,7 +19,7 @@ try:
     else:
 
         dbfile = Path().home() / '.local' / 'share' / 'medical.db'
-
+        
     db = sqlite3.connect(str(dbfile))
 
 except sqlite3.OperationalError as e:
@@ -27,7 +27,6 @@ except sqlite3.OperationalError as e:
     click.echo(f'{str(e).capitalize()}: {dbfile}')
 
     exit(1)
-
 
 db.execute("pragma foreign_keys = on")
 
@@ -66,20 +65,26 @@ def dose():
 
 @dose.command()
 @click.argument('name')
-@click.argument('datetime', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[DATE_TIME]')
+@click.argument('datetime', required=False, type=click.DateTime(['%H:%M','%Y-%m-%d %H:%M']), metavar='[DATE_TIME]')
 @click.option('--comment', "-c")
 #@click.argument('comment', required=False)
 def insert(name, datetime, comment):
 
     '''Insert a dose with NAME and an optional comment.  If no DATE_TIME is given now will be used.'''
-
-    if datetime == None:
-
-        datetime = dt.datetime.now()
     
     if comment == None:
 
         comment = ''
+    
+    if datetime == None:
+
+        datetime = dt.datetime.now()
+        
+    if datetime.year == 1900:
+
+        now = dt.datetime.now()
+
+        datetime = datetime.replace(year=now.year, month=now.month, day=now.day)
 
     sql = '''insert into dose (name, datetime, comment) values( ?, ?, ?)'''
 
@@ -280,7 +285,7 @@ def list(start_time, end_time):
 
     if start_time is None:
 
-        start_time = dt.datetime.now() - dt.timedelta(weeks=52)
+        start_time = dt.datetime.now() - dt.timedelta(days=30)
 
     if end_time is None:
 
