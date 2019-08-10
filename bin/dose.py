@@ -6,6 +6,8 @@ from pathlib import Path
 import datetime as dt
 import tabulate
 from prompt_toolkit import prompt
+from prompt_toolkit.validation import Validator, ValidationError
+import re
 #import configparser as cp
 
 try:
@@ -61,7 +63,7 @@ def list_rows(rows):
 #@click.pass_context
 def dose():
     
-    '''Maintain a medication dose database. All date time formats are %Y-%m-%d or %Y-%m-%d %H:%M.'''
+    '''Maintain a medication dose database. All date time formats are %%H:%M or %Y-%m-%d %H:%M.'''
 
 @dose.command()
 @click.argument('name')
@@ -70,7 +72,7 @@ def dose():
 #@click.argument('comment', required=False)
 def insert(name, datetime, comment):
 
-    '''Insert a dose with NAME and an optional comment.  If no DATE_TIME is given now will be used.'''
+    '''Insert a dose with NAME, an optional comment and a DATE_TIME in the format %H:%M or %Y-%m-%d %H:%M.  If no DATE_TIME is given now will be used.'''
     
     if comment == None:
 
@@ -110,12 +112,39 @@ def insert(name, datetime, comment):
         
         exit(1)
 
+class UpdateDateValidator(Validator):
+
+    def validate(self, document):
+
+        text = document.text
+        
+        #click.echo(dt.datetime.strptime(text, '%Y-%m-%d %H:%M'))
+        # if not ( re.match(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', text) or re.match(r'\d{2}:\d{2}', text) ):
+        isValidDate = True
+
+        try:
+
+            dt.datetime.strptime(text, '%Y-%m-%d %H:%M')
+
+        except ValueError:
+
+            isValidDate = False
+        
+        if not re.match(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', text):
+
+            isValidDate = False
+
+        if not isValidDate:
+
+            raise ValidationError(message = 'Date must be formatted %Y-%m-%d %H:%M')
+        
+            # raise ValidationError(message = 'Date must be formatted %Y-%m-%d %H:%M or %H:%M')            
 
 @dose.command()
 @click.argument('id', type=int)
 def update(id):
 
-    '''Update the dose with the given ID.'''
+    '''Update the dose having the given ID.'''
 
     sql = '''select name, strftime('%Y-%m-%d %H:%M',datetime), comment from dose where id = ?'''
 
@@ -133,7 +162,7 @@ def update(id):
 
     name = prompt("Name: ", default=name)
 
-    datetime = prompt("Date Time: ", default=datetime)
+    datetime = prompt("Date Time: ", default=datetime, validator=UpdateDateValidator(), validate_while_typing=False)
 
     comment = prompt("Comment: ", default=comment)
     
@@ -152,13 +181,13 @@ def update(id):
         exit(1)
 
     click.echo(f'Update of dose {id} succeeded.')
-       
+
 
 @dose.command()
 @click.argument('id', type=int)
 def delete(id):
 
-    '''Delete the dose with the given ID.'''
+    '''Delete the dose having the given ID.'''
 
     sql = 'delete from dose where id = ?'
 
@@ -196,7 +225,7 @@ def search(search_string, start_time, end_time):
 
     """Case insensitive search of dose names and comments between START_TIME and END_TIME. 
     SEARCH_STRING may contain the operators *, (), AND, OR and NOT.  Start time defaults to
-    1 year ago. End time defaults to now.    
+    1 year ago. End time defaults to now.  Valid date formats are %Y-%m-%d or %Y-%m-%d %H:%M.
     """
 
     if start_time is None:
@@ -236,7 +265,7 @@ def search(search_string, start_time, end_time):
 @click.argument('end_time', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[END_TIME]')
 def count(name, start_time, end_time):
 
-    '''Print statistics regarding doses between two dates.  Defaults to last 30 days.'''
+    '''Print statistics regarding doses between two dates.  Defaults to last 30 days.  Valid date formats are %Y-%m-%d or %Y-%m-%d %H:%M'''
 
     if start_time == None:
 
@@ -281,7 +310,7 @@ def count(name, start_time, end_time):
 @click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[END_TIME]')
 def list(start_time, end_time):
 
-    '''List all doses between START_TIME and END_TIME.  Defaults to last 52 weeks.'''
+    '''List all doses between START_TIME and END_TIME.  Defaults to last 52 weeks.  Valid date formats are %Y-%m-%d or %Y-%m-%d %H:%M'''
 
     if start_time is None:
 
@@ -307,4 +336,3 @@ def list(start_time, end_time):
 
 if __name__ == '__main__':
     dose()
-#    dose(obj={})
