@@ -63,16 +63,22 @@ def list_rows(rows):
 #@click.pass_context
 def dose():
     
-    '''Maintain a medication dose database. All date time formats are %%H:%M or %Y-%m-%d %H:%M.'''
+    '''Maintain a medication dose database.
+    
+    All time formats are %%H:%M, %Y-%m-%d or %Y-%m-%d %H:%M.
+    '''
 
 @dose.command()
 @click.argument('name')
-@click.argument('datetime', required=False, type=click.DateTime(['%H:%M','%Y-%m-%d %H:%M']), metavar='[DATE_TIME]')
+@click.argument('datetime', required=False, type=click.DateTime(['%H:%M','%Y-%m-%d %H:%M']), metavar='[TIME]')
 @click.option('--comment', "-c")
 #@click.argument('comment', required=False)
 def insert(name, datetime, comment):
 
-    '''Insert a dose with NAME, an optional comment and a DATE_TIME in the format %H:%M or %Y-%m-%d %H:%M.  If no DATE_TIME is given now will be used.'''
+    '''Insert a dose with NAME.
+    
+    An optional comment and a TIME in the format %H:%M or %Y-%m-%d %H:%M.  If no TIME is given the current time will be used.
+    '''
     
     if comment == None:
 
@@ -136,7 +142,7 @@ class UpdateDateValidator(Validator):
 
         if not isValidDate:
 
-            raise ValidationError(message = 'Date must be formatted %Y-%m-%d %H:%M')
+            raise ValidationError(message = 'Time must be of the form: %Y-%m-%d %H:%M')
         
             # raise ValidationError(message = 'Date must be formatted %Y-%m-%d %H:%M or %H:%M')            
 
@@ -144,7 +150,8 @@ class UpdateDateValidator(Validator):
 @click.argument('id', type=int)
 def update(id):
 
-    '''Update the dose having the given ID.'''
+    '''Update the dose having the given ID.
+    '''
 
     sql = '''select name, strftime('%Y-%m-%d %H:%M',datetime), comment from dose where id = ?'''
 
@@ -187,7 +194,8 @@ def update(id):
 @click.argument('id', type=int)
 def delete(id):
 
-    '''Delete the dose having the given ID.'''
+    '''Delete the dose having the given ID.
+    '''
 
     sql = 'delete from dose where id = ?'
 
@@ -223,9 +231,10 @@ def delete(id):
 #@click.pass_context
 def search(search_string, start_time, end_time):
 
-    """Case insensitive search of dose names and comments between START_TIME and END_TIME. 
-    SEARCH_STRING may contain the operators *, (), AND, OR and NOT.  Start time defaults to
-    1 year ago. End time defaults to now.  Valid date formats are %Y-%m-%d or %Y-%m-%d %H:%M.
+    """Case insensitive search of dose names and comments between START_TIME and END_TIME.
+
+    SEARCH_STRING may contain the operators *, (), AND, OR and NOT.  Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.  Start time defaults to 1 year ago.
+    End time defaults to the current time.
     """
 
     if start_time is None:
@@ -246,7 +255,7 @@ def search(search_string, start_time, end_time):
     
     except sqlite3.OperationalError:
 
-        click.echo(f"Use only AND, OR, NOT, * and () in the search string.")
+        click.echo('Search error: Use only the operators *, (), AND, OR and NOT in the search string.  Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.')
 
         exit(1)
 
@@ -265,7 +274,10 @@ def search(search_string, start_time, end_time):
 @click.argument('end_time', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[END_TIME]')
 def count(name, start_time, end_time):
 
-    '''Print statistics regarding doses between two dates.  Defaults to last 30 days.  Valid date formats are %Y-%m-%d or %Y-%m-%d %H:%M'''
+    '''Print statistics regarding doses for NAME between two times.
+    
+    Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M. If no dates are given, the last 30 days are searched.
+    '''
 
     if start_time == None:
 
@@ -310,7 +322,10 @@ def count(name, start_time, end_time):
 @click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[END_TIME]')
 def list(start_time, end_time):
 
-    '''List all doses between START_TIME and END_TIME.  Defaults to last 52 weeks.  Valid date formats are %Y-%m-%d or %Y-%m-%d %H:%M'''
+    '''List all doses between START_TIME and END_TIME.
+    
+    Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.  If no times are given the last 52 weeks will be searched.
+    '''
 
     if start_time is None:
 
