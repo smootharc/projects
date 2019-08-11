@@ -93,7 +93,12 @@ def main(minutes, files, directory, nosort):
         print('No videos found!')
 
     if minutes is not None:
+
         ddl @(f'{minutes}')
+
+    else:
+
+        ddl
 
 if __name__ == '__main__':
     main()
