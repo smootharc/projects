@@ -65,7 +65,7 @@ def dose():
     
     '''Maintain a medication dose database.
     
-    All time formats are %%H:%M, %Y-%m-%d or %Y-%m-%d %H:%M.
+    All time formats are %H:%M, %Y-%m-%d or %Y-%m-%d %H:%M.
     '''
 
 @dose.command()
@@ -93,6 +93,10 @@ def insert(name, datetime, comment):
         now = dt.datetime.now()
 
         datetime = datetime.replace(year=now.year, month=now.month, day=now.day)
+
+    if datetime > dt.datetime.now():
+
+        datetime = dt.datetime.now()
 
     sql = '''insert into dose (name, datetime, comment) values( ?, ?, ?)'''
 
@@ -324,7 +328,7 @@ def list(start_time, end_time):
 
     '''List all doses between START_TIME and END_TIME.
     
-    Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.  If no times are given the last 52 weeks will be searched.
+    Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.  If no times are given the last 30 days will be searched.
     '''
 
     if start_time is None:
