@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#touch ~/.cache/exdl.ts
+
+while true
+do
+
+#    if [ "$(find ~/Downloads -mindepth 1 -newer ~/.cache/exdl.ts)" ]
+    if [ "$(find ~/Downloads -maxdepth 0 -empty)" ]
+    then
+        
+        systemctl --user stop exdl.service 
+
+    else
+
+        find /home/paul/Downloads -name "_unpack" -prune , -type f -name "*zip" -execdir unzip -n '{}' \; -execdir rm '{}' \;
+
+        find /home/paul/Downloads -name "_unpack" -prune , -type f -name "*rar" -execdir unrar x -o- -p- '{}' \; -execdir rm '{}' \;
+
+        sleep 30
+
+    fi
+    
+
+done
