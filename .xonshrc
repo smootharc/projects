@@ -33,13 +33,14 @@ aliases['meds'] = 'gcalcli --lineart unicode --calendar Medical'
 aliases['hds'] = 'udisksctl status'
 aliases['we'] = 'curl wttr.in/08096'
 aliases['hdu'] = 'udisksctl unmount -b'
-aliases['up'] = 'pamac update'
 aliases['scu'] = 'systemctl --user'
 aliases['jcu'] = 'journalctl --user'
 aliases['sc'] = 'systemctl'
 aliases['jc'] = 'journalctl'
 aliases['date'] = 'date -R'
 aliases['inxi'] = 'sudo inxi'
+aliases['up'] = 'sudo pacman -Syyu'
+aliases['l'] = 'exa'
 
 xontrib jedi prompt_ret_code vox bashisms
 # XONSH WIZARD START

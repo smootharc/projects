@@ -4,7 +4,9 @@ t="$1"
 
 rmempty() {
 
-    find ~/Downloads -mindepth 1 -empty -delete 2> /dev/null
+#    find ~/Downloads -type f -size -1024c -delete 2> /dev/null
+#    find ~/Downloads -name "_unpack" -prune , -type f -size -16 -execdir rm {} 2> /dev/null \;
+    find ~/Downloads -mindepth 1 -type d -empty -delete 2> /dev/null
 
 }
 
