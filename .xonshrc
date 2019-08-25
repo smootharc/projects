@@ -18,7 +18,8 @@ $RESTIC_PASSWORD_FILE = $HOME + '/.config/restic/password'
 $RESTIC_REPOSITORY = '/backup/' + $USER
 $CDPATH = ['.','~','~/.config','~/.config/systemd']
 $HISTCONTROL = 'ignoredups,ignoreerr'
-#$PAGER = 'most -s'
+$VI_MODE = True
+$PAGER = 'less'
 
 
 def say(something="Hello"):
@@ -43,14 +44,6 @@ aliases['up'] = 'sudo pacman -Syyu'
 aliases['l'] = 'exa'
 
 xontrib jedi prompt_ret_code vox bashisms
-# XONSH WIZARD START
-#source-bash --sourcer source "echo loading xonsh foreign shell"
-# XONSH WIZARD END
 
-#source-bash /etc/profile --suppress-skip-message
 if '/home/paul/bin' not in $PATH:
     source-bash -l True ""
-#    source-bash --login True "echo loading xonsh foreign shell"
-#    source-bash --login True "echo loading xonsh foreign shell"
-#    $PATH.insert(0,'~/.local/bin')
-#    $PATH.insert(0,'~/bin')
