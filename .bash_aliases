@@ -32,7 +32,6 @@ calc () {
 export -f calc
 export -f hdu
 export -f hdt
-export BROWSER=firefox
 export INFO_PRINT_COMMAND="a2ps -s 2"
 export EDITOR=vim
 export VISUAL=vim
