@@ -1,4 +1,4 @@
-# vi:syntax=python
+#vi:syntax=python
 
 $XONSH_SHOW_TRACEBACK = False
 $XONSH_TRACEBACK_LOGFILE = "/home/paul/.xonsh.log"
@@ -20,30 +20,28 @@ $CDPATH = ['.','~','~/.config','~/.config/systemd']
 $HISTCONTROL = 'ignoredups,ignoreerr'
 $VI_MODE = True
 $PAGER = 'less'
-
-
-def say(something="Hello"):
-    print(something)
+$FONTCONFIG_PATH = '/etc/fonts'
+$BROWSER = 'chromium'
 
 def _hdt():
-    for d in g`/dev/sd?`: 
-        hddtemp @(d) 
+    for d in g`/dev/sd?`:
+        hddtemp @(d)
 
 aliases['hdt'] = _hdt
-aliases['meds'] = 'gcalcli --lineart unicode --calendar Medical'
 aliases['hds'] = 'udisksctl status'
-aliases['we'] = 'curl wttr.in/08096'
 aliases['hdu'] = 'udisksctl unmount -b'
 aliases['scu'] = 'systemctl --user'
 aliases['jcu'] = 'journalctl --user'
 aliases['sc'] = 'systemctl'
 aliases['jc'] = 'journalctl'
+aliases['we'] = 'curl wttr.in/08096'
 aliases['date'] = 'date -R'
 aliases['inxi'] = 'sudo inxi'
-aliases['up'] = 'sudo pacman -Syyu'
 aliases['l'] = 'exa'
+aliases['ll'] = 'exa -Hl'
+aliases['di'] = 'lsblk -o name,model,serial,fstype,mountpoint,label'
 
-xontrib jedi prompt_ret_code vox bashisms
+xontrib jedi prompt_ret_code vox # coreutils bashisms
 
 if '/home/paul/bin' not in $PATH:
     source-bash -l True ""
