@@ -77,7 +77,7 @@ def insert(name, datetime, comment):
 
     '''Insert a dose with NAME.
     
-    An optional comment and a TIME in the format %H:%M or %Y-%m-%d %H:%M.  If no TIME is given the current time will be used.
+    An optional comment and a TIME in the format %H:%M or %Y-%m-%d %H:%M.  If the given TIME is absent or in the future the current time will be used.
     '''
     
     if comment == None:
@@ -97,6 +97,8 @@ def insert(name, datetime, comment):
     if datetime > dt.datetime.now():
 
         datetime = dt.datetime.now()
+
+        click.echo("Future times are not supported.  Inserting using the current time.")
 
     sql = '''insert into dose (name, datetime, comment) values( ?, ?, ?)'''
 
@@ -198,7 +200,7 @@ def update(id):
 @click.argument('id', type=int)
 def delete(id):
 
-    '''Delete the dose having the given ID.
+    '''Delete the dose having the given ID.  The ID must be an integer.
     '''
 
     sql = 'delete from dose where id = ?'
@@ -209,17 +211,25 @@ def delete(id):
 
             deleted = db.execute(sql,(id,))
 
-            db.commit
-
             if deleted.rowcount == 0:
 
-                click.echo(f"Deletion of dose {id} failed.")
+                click.echo(f"Deletion of dose {id} failed. Are you sure it exists?")
 
                 exit(1)
 
             else:
 
-                click.echo(f'Deletion of dose {id} succeeded.')               
+                confirmation = click.prompt('Type the dose ID again to confirm deletion', type=int)
+                
+                if confirmation != id:
+
+                    click.echo(f'Confirmation failed. Dose {id} not deleted.' )
+
+                    db.rollback()
+
+                else:
+
+                    click.echo(f'Deletion of dose {id} succeeded.')
 
     except sqlite3.Error as e:
 
@@ -328,7 +338,7 @@ def list(start_time, end_time):
 
     '''List all doses between START_TIME and END_TIME.
     
-    Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.  If no times are given the last 30 days will be searched.
+    Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.  If no times are given the last 30 days will be listed.
     '''
 
     if start_time is None:
