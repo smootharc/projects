@@ -4,9 +4,9 @@ help () {
 
     cat << EOF
 
-Usage: $(basename "$0") [H]
+Usage: $(basename "$0") [M]
 
-Set deepin line power sleep delay to H positive integer minutes.
+Set deepin line power sleep delay to M positive integer minutes.
 
 No parameter will show current setting.
 
