@@ -38,7 +38,9 @@ aliases['we'] = 'curl wttr.in/08096'
 aliases['date'] = 'date -R'
 aliases['inxi'] = 'sudo inxi'
 aliases['l'] = 'exa'
+aliases['la'] = 'exa -a'
 aliases['ll'] = 'exa -Hl'
+aliases['lla'] = 'exa -Hla'
 aliases['di'] = 'lsblk -o name,model,serial,fstype,mountpoint,label'
 
 xontrib jedi prompt_ret_code vox # coreutils bashisms
