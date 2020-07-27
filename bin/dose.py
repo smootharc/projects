@@ -10,29 +10,68 @@ from prompt_toolkit.validation import Validator, ValidationError
 import re
 #import configparser as cp
 
-try:
+def dbopen(readonly=False):
 
-    programdir = Path(__file__).parent.resolve()
-    
-    if 'projects' in str(programdir):
+    try:
 
-        dbfile = Path().home() / 'projects' / '.local' / 'share' / 'medical.db'
-    
-    else:
-
-        dbfile = Path().home() / '.local' / 'share' / 'medical.db'
+        programdir = Path(__file__).parent.resolve()
         
-    db = sqlite3.connect(str(dbfile))
+        if 'projects' in str(programdir):
 
-except sqlite3.OperationalError as e:
+            dbfile = Path().home() / 'projects' / '.local' / 'share' / 'medical.db'
+        
+        else:
 
-    click.echo(f'{str(e).capitalize()}: {dbfile}')
+            dbfile = Path().home() / '.local' / 'share' / 'medical.db'
 
-    exit(1)
+        uri = 'file:' + str(dbfile)
 
-db.execute("pragma foreign_keys = on")
+        if readonly:
 
-db.row_factory = sqlite3.Row
+            db = sqlite3.connect(uri + '?mode=ro', uri=True)
+
+        else:
+
+            db = sqlite3.connect(uri, uri=True)
+
+        db.execute("pragma foreign_keys = on")
+
+        db.row_factory = sqlite3.Row
+            
+#        db = sqlite3.connect(str(dbfile))
+
+    except sqlite3.OperationalError as e:
+
+        click.echo(f'{str(e).capitalize()}: {dbfile}')
+
+        exit(1)
+
+
+    return db
+
+#try:
+#
+#    programdir = Path(__file__).parent.resolve()
+#    
+#    if 'projects' in str(programdir):
+#
+#        dbfile = Path().home() / 'projects' / '.local' / 'share' / 'medical.db'
+#    
+#    else:
+#
+#        dbfile = Path().home() / '.local' / 'share' / 'medical.db'
+#        
+#    db = sqlite3.connect(str(dbfile))
+#
+#except sqlite3.OperationalError as e:
+#
+#    click.echo(f'{str(e).capitalize()}: {dbfile}')
+#
+#    exit(1)
+#
+#db.execute("pragma foreign_keys = on")
+#
+#db.row_factory = sqlite3.Row
 
 def list_rows(rows):
 
@@ -102,6 +141,8 @@ def insert(name, datetime, comment):
 
     sql = '''insert into dose (name, datetime, comment) values( ?, ?, ?)'''
 
+    db = dbopen()
+
     try:
 
         with db:
@@ -159,6 +200,8 @@ def update(id):
     '''Update the dose having the given ID.
     '''
 
+    db = dbopen()
+
     sql = '''select name, strftime('%Y-%m-%d %H:%M',datetime), comment from dose where id = ?'''
 
     dose = db.execute(sql, (id,)).fetchone()
@@ -202,6 +245,8 @@ def delete(id):
 
     '''Delete the dose having the given ID.  The ID must be an integer.
     '''
+
+    db = dbopen()
 
     sql = 'delete from dose where id = ?'
 
@@ -251,6 +296,8 @@ def search(search_string, start_time, end_time):
     End time defaults to the current time.
     """
 
+    db = dbopen(True)
+
     if start_time is None:
 
         start_time = dt.datetime.now() - dt.timedelta(weeks=52)
@@ -292,6 +339,8 @@ def count(name, start_time, end_time):
     
     Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M. If no dates are given, the last 30 days are searched.
     '''
+
+    db = dbopen(True)
 
     if start_time == None:
 
@@ -340,6 +389,8 @@ def list(start_time, end_time):
     
     Valid time formats are %Y-%m-%d or %Y-%m-%d %H:%M.  If no times are given the last 30 days will be listed.
     '''
+
+    db = dbopen(True)
 
     if start_time is None:
 
