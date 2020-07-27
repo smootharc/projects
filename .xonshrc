@@ -3,8 +3,8 @@
 $XONSH_SHOW_TRACEBACK = False
 $XONSH_TRACEBACK_LOGFILE = "/home/paul/.xonsh.log"
 
-import sqlite3
-from prompt_toolkit import prompt
+#import sqlite3
+#from prompt_toolkit import prompt
 
 $AUTO_PUSHD = '0'
 $AUTO_SUGGEST_IN_COMPLETIONS = '1'
@@ -36,14 +36,15 @@ aliases['sc'] = 'systemctl'
 aliases['jc'] = 'journalctl'
 aliases['we'] = 'curl wttr.in/08096'
 aliases['date'] = 'date -R'
-aliases['inxi'] = 'sudo inxi'
+aliases['inxi'] = 'doas inxi'
 aliases['l'] = 'exa'
 aliases['la'] = 'exa -a'
 aliases['ll'] = 'exa -Hl'
 aliases['lla'] = 'exa -Hla'
-aliases['di'] = 'lsblk -o name,model,serial,fstype,mountpoint,label'
 
 xontrib jedi prompt_ret_code vox # coreutils bashisms
 
-if '/home/paul/bin' not in $PATH:
-    source-bash -l True ""
+#if '/home/paul/.local/bin' not in $PATH:
+#    source-bash -l True ""
+#if $XONSH_LOGIN:
+#    echo "Login Shell"
