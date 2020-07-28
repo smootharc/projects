@@ -23,11 +23,6 @@ $PAGER = 'less'
 $FONTCONFIG_PATH = '/etc/fonts'
 $BROWSER = 'chromium'
 
-def _hdt():
-    for d in g`/dev/sd?`:
-        hddtemp @(d)
-
-aliases['hdt'] = _hdt
 aliases['hds'] = 'udisksctl status'
 aliases['hdu'] = 'udisksctl unmount -b'
 aliases['scu'] = 'systemctl --user'
@@ -43,8 +38,3 @@ aliases['ll'] = 'exa -Hl'
 aliases['lla'] = 'exa -Hla'
 
 xontrib jedi prompt_ret_code vox # coreutils bashisms
-
-#if '/home/paul/.local/bin' not in $PATH:
-#    source-bash -l True ""
-#if $XONSH_LOGIN:
-#    echo "Login Shell"
