@@ -30,8 +30,8 @@ if [[ $t =~ ^[[:digit:]]+$ ]]; then
     find ~/Downloads -mindepth 1 -cmin +"$t" -delete 2> /dev/null
     exit 0
 
-else
+#else
 
-    help 1
+#    help 1
 
 fi

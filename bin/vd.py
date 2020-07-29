@@ -100,13 +100,13 @@ def main(minutes, files, directory, nosort):
 
     if minutes is None:
 
-        subprocess.run(['bin/ddl'])
+        subprocess.run(['ddl'])
 
 #        ddl @(f'{minutes}')
 
     else:
 
-        subprocess.run(['bin/ddl', str(minutes)])
+        subprocess.run(['ddl', str(minutes)])
 
 if __name__ == '__main__':
     main()
