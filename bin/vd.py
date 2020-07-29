@@ -1,16 +1,18 @@
-#!/bin/env xonsh
+#!/usr/bin/env python
 
 # vi:syntax=python
 
-import os
+#import os
 import tempfile
 import click
 import mimetypes
+import subprocess
 from pathlib import Path
 
 @click.command()
 
-@click.option('-n', is_flag=True, 'nosort', help='No sort.')
+#@click.option('-n', is_flag=True, 'nosort', help='No sort.')
+@click.option('-n', 'nosort', is_flag=True, help='No sort.')
 
 @click.option('-m','--minutes', type=int, required=False, help='Delete files older than INTEGER minutes.')
 
@@ -26,8 +28,10 @@ from pathlib import Path
 def main(minutes, files, directory, nosort):
 
     '''Display images and videos from a directory that have absolutes pathnames matching some regex.  Normally sorted newest to oldest.'''
-        
-    files = [file.strip() for file in !(fd -E _unpack -a -p -t f @(files) @(Path(directory).expanduser()) )]
+
+    files = subprocess.run(['fd', '-E',' _unpack', '-a', '-p', '-t', 'f', files, directory], stdout=subprocess.PIPE, check=True, text=True).stdout.splitlines()        
+
+    #files = [file.strip() for file in !(fd -E _unpack -a -p -t f @(files) @(Path(directory).expanduser()) )]
         
     videos = []
 
@@ -68,7 +72,8 @@ def main(minutes, files, directory, nosort):
                     except UnicodeError:
                         continue
 
-            feh -dqFf @(f'{fd.name}')
+#            feh -dqFf @(f'{fd.name}')
+            subprocess.run(['feh', '-dqFf', fd.name])
     
     else:
 
@@ -86,19 +91,22 @@ def main(minutes, files, directory, nosort):
                     except UnicodeError:
                         continue
 
-            mpv @(f'{fd.name}')
+            #mpv @(f'{fd.name}')
+            subprocess.run(['mpv', fd.name])
     
     else:
 
         print('No videos found!')
 
-    if minutes is not None:
+    if minutes is None:
 
-        ddl @(f'{minutes}')
+        subprocess.run(['bin/ddl'])
+
+#        ddl @(f'{minutes}')
 
     else:
 
-        ddl
+        subprocess.run(['bin/ddl', str(minutes)])
 
 if __name__ == '__main__':
     main()

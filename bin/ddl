@@ -1,7 +1,7 @@
 #!/bin/bash
 
 t="$1"
-
+#echo "$t"
 rmempty() {
 
 #    find ~/Downloads -type f -size -1024c -delete 2> /dev/null
@@ -12,24 +12,26 @@ rmempty() {
 
 help() {
 
-    echo -e "\nUsage: $(basename $0) M\n\nM must be an integer greater than or equal to zero.  No files deleted.\n"			
+    echo -e "\nUsage: $(basename $0) [M]\n\nAll files in the ~/Downloads directory older than M minutes will be deleted.  Empty directories will be deleted.\nM must be an integer greater than or equal to zero.\n"
     exit "$1"
     
 }
 
 trap rmempty EXIT
 
-[[ $# -eq 0 ]] && exit 0
+#[[ -z $1 ]] && exit 0
 
 [[ $t == "-h" ]] && help 0
+
+#[[ $t -lt 0 ]] && help 1
 
 if [[ $t =~ ^[[:digit:]]+$ ]]; then
 
     find ~/Downloads -mindepth 1 -cmin +"$t" -delete 2> /dev/null
+    exit 0
 
 else
 
     help 1
 
 fi
-
