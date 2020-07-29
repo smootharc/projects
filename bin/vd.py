@@ -29,7 +29,7 @@ def main(minutes, files, directory, nosort):
 
     '''Display images and videos from a directory that have absolutes pathnames matching some regex.  Normally sorted newest to oldest.'''
 
-    files = subprocess.run(['fd', '-E',' _unpack', '-a', '-p', '-t', 'f', files, directory], stdout=subprocess.PIPE, check=True, text=True).stdout.splitlines()        
+    files = subprocess.run(['fd', '-E', '_unpack', '-a', '-p', '-t', 'f', files, directory], stdout=subprocess.PIPE, check=True, text=True).stdout.splitlines()        
 
     #files = [file.strip() for file in !(fd -E _unpack -a -p -t f @(files) @(Path(directory).expanduser()) )]
         
