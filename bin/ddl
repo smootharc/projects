@@ -12,7 +12,7 @@ rmempty() {
 
 help() {
 
-    echo -e "\nUsage: $(basename $0) [M]\n\nAll files in the ~/Downloads directory older than M minutes will be deleted.  Empty directories will be deleted.\nM must be an integer greater than or equal to zero.\n"
+    echo -e "\nUsage: $(basename "$0") [M]\n\nAll files in the ~/Downloads directory older than M minutes will be deleted.  Empty directories will be deleted.\nM must be an integer greater than or equal to zero.\n"
     exit "$1"
     
 }
