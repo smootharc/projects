@@ -15,15 +15,15 @@ do
 
         sleep 1
 
-        find ~/Downloads -mindepth 1 -ctime +1 -delete
+#        find ~/Downloads -mindepth 1 -ctime +1 -delete
         
-        find ~/Downloads -iname "*.par2" -cmin +30 -delete
+#        find ~/Downloads -iname "*.par2" -cmin +30 -delete
         
-        find ~/Downloads -iname "*.zip" -cmin +30 -delete
+#        find ~/Downloads -iname "*.zip" -cmin +30 -delete
 
-        find ~/Downloads -iname "*.rar" -cmin +30 -delete
+#        find ~/Downloads -iname "*.rar" -cmin +30 -delete
 
-        find ~/Downloads -regextype posix-extended -regex ".*r[[:digit:]]{2}" -cmin +30 -delete
+#        find ~/Downloads -regextype posix-extended -regex ".*r[[:digit:]]{2}" -cmin +30 -delete
 
 #        find ~/Downloads -name "*par2" -not -name "*vol*par2" -execdir par2repair '{}' \;
         
