@@ -7,4 +7,5 @@ fi
 
 #cd && rsync -arP --delete --timeout=60 --exclude 'bin/dose' --exclude 'bin/dosenow' --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
 #cd && rsync -arP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
-cd && rsync -arP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --files-from=.config/rsync/from-home ~ "$1"::paul
+#cd && rsync -alrP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --files-from=.config/rsync/from-home ~ "$1"::paul
+cd && rsync -HalrP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --files-from=.config/rsync/from-home ~ "$1":~
