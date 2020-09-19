@@ -1,7 +1,5 @@
 #!/bin/bash
 
-t="$1"
-#echo "$t"
 rmempty() {
 
 #    find ~/Downloads -type f -size -1024c -delete 2> /dev/null
@@ -19,19 +17,17 @@ help() {
 
 trap rmempty EXIT
 
-#[[ -z $1 ]] && exit 0
+[[ $1 == "-h" ]] && help 0
 
-[[ $t == "-h" ]] && help 0
+[[ $1 == "" ]] && exit 0
 
-#[[ $t -lt 0 ]] && help 1
+if [[ $1 =~ ^[[:digit:]]+$ ]]; then
 
-if [[ $t =~ ^[[:digit:]]+$ ]]; then
-
-    find ~/Downloads -mindepth 1 -cmin +"$t" -delete 2> /dev/null
+    find ~/Downloads -mindepth 1 -cmin +"$1" -delete 2> /dev/null
     exit 0
 
-#else
+else
 
-#    help 1
+    help 1
 
 fi
