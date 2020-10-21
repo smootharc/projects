@@ -6,7 +6,40 @@ import tempfile
 import click
 import mimetypes
 import subprocess
+import re
 from pathlib import Path
+
+def getfiles(directory, names):
+
+    try:
+
+        if names.islower():
+
+            regex = re.compile(names, re.IGNORECASE)
+
+        else:
+
+            regex = re.compile(names)
+
+    except:
+
+        click.echo("Invalid regular expression in option: -f TEXT.", err=True)
+
+        exit(1)
+
+    files = ( f for f in Path(directory).expanduser().rglob('*') if regex.search(str(f)) and '_unpack' not in str(f) )
+
+    for f in files:
+
+        if f.is_dir():
+
+            getfiles(f.name,'.*')
+
+            continue
+
+        if f.is_file():
+
+            yield f.resolve()
 
 @click.command()
 
@@ -16,15 +49,13 @@ from pathlib import Path
 
 @click.option('-d', '--directory', default=Path('~/Downloads').expanduser(), type=click.Path(exists=True), show_default=True, help='Directory to search.' )
 
-@click.option('-f', '--files', required=False, default='*', show_default=True, help='Return absolute pathnames matching the glob TEXT.')
+@click.option('-f', '--files', required=False, default='.*', show_default=True, help='Return absolute pathnames matching the regex TEXT.')
 
 def main(minutes, files, directory, nosort):
 
     '''Display images and videos from a directory that have absolutes pathnames matching some regex.  Normally sorted newest to oldest.'''
 
-    files = Path(directory).rglob(files)
-
-    files = filter(lambda file: not file.is_dir() and '_unpack' not in str(file), files)
+    files = getfiles(directory, files)
         
     videos = []
 
@@ -55,13 +86,21 @@ def main(minutes, files, directory, nosort):
 
     if len(images) > 0:
         if not nosort:
+
             images.sort(key = lambda fctime: fctime[1], reverse = True)
+
         with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8') as tf:
+
             with open(tf.name, "w") as fd:
+
                 for i in images:
+
                     try:
+
                         fd.write(i[0] + "\n")
+
                     except UnicodeError:
+
                         continue
 
             subprocess.run(['feh', '-dqFf', fd.name])
@@ -71,15 +110,25 @@ def main(minutes, files, directory, nosort):
         print("No images found!")
 
     if len(videos) > 0:
+
         if not nosort:
+
             videos.sort(key = lambda fctime: fctime[1], reverse = True)
+
         with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8') as tf:
+
             with open(tf.name, "w") as fd:
+
                 fd.write("#EXTM3U\n")
+
                 for v in videos:
+
                     try:
+
                         fd.write(v[0] + "\n")
+
                     except UnicodeError:
+
                         continue
 
             subprocess.run(['mpv', fd.name])
