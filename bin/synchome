@@ -1,11 +1,40 @@
 #!/bin/sh
 
 if [ -z "$1" ]; then
-    echo "Usage: $(basename $0) sshservername."
+
+    echo "Usage: $(basename $0) [sshservername|directory]"
+
     exit 1  
 fi
 
-#cd && rsync -arP --delete --timeout=60 --exclude 'bin/dose' --exclude 'bin/dosenow' --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
-#cd && rsync -arP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --delete-excluded --files-from=.config/rsync/from-home ~ "$1"::paul
-#cd && rsync -alrP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --files-from=.config/rsync/from-home ~ "$1"::paul
-cd && rsync -HalrP --delete --timeout=60 --exclude-from=.config/rsync/exclude-home --files-from=.config/rsync/from-home ~ "$1":~
+if ssh -q $1 sh -c 'exit'; then
+
+    target="$1:~"
+
+    if rsync -HarlP --delete --timeout=60 --exclude-from ~/.config/rsync/exclude-home --files-from ~/.config/rsync/from-home ~ "$target"; then
+
+        exit 0
+
+    fi
+
+fi
+
+targetdir="$(dirname $1)"
+
+if ! [ -d "$targetdir" ]; then
+
+    echo "Error: target directory $targetdir does not exist."
+
+    exit 1
+
+fi
+ 
+if rsync -HarlP --delete --timeout=60 --exclude-from ~/.config/rsync/exclude-home --files-from ~/.config/rsync/from-home ~ "$1"; then
+
+    exit 0
+
+else
+
+    exit 1
+
+fi
