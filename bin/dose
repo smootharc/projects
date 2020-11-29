@@ -37,8 +37,6 @@ def dbopen(readonly=False):
         db.execute("pragma foreign_keys = on")
 
         db.row_factory = sqlite3.Row
-            
-#        db = sqlite3.connect(str(dbfile))
 
     except sqlite3.OperationalError as e:
 
@@ -48,30 +46,6 @@ def dbopen(readonly=False):
 
 
     return db
-
-#try:
-#
-#    programdir = Path(__file__).parent.resolve()
-#    
-#    if 'projects' in str(programdir):
-#
-#        dbfile = Path().home() / 'projects' / '.local' / 'share' / 'medical.db'
-#    
-#    else:
-#
-#        dbfile = Path().home() / '.local' / 'share' / 'medical.db'
-#        
-#    db = sqlite3.connect(str(dbfile))
-#
-#except sqlite3.OperationalError as e:
-#
-#    click.echo(f'{str(e).capitalize()}: {dbfile}')
-#
-#    exit(1)
-#
-#db.execute("pragma foreign_keys = on")
-#
-#db.row_factory = sqlite3.Row
 
 def list_rows(rows):
 
@@ -96,10 +70,8 @@ def list_rows(rows):
         rows_to_print.append([date, row['time'], row['id'], row['name'], row['comment']])
 
     click.echo(tabulate.tabulate(rows_to_print, tablefmt="plain"))
-    #print(tabulate.tabulate(rows_to_print, tablefmt="plain"))
 
 @click.group()
-#@click.pass_context
 def dose():
     
     '''Maintain a medication dose database.
@@ -111,7 +83,6 @@ def dose():
 @click.argument('name')
 @click.argument('datetime', required=False, type=click.DateTime(['%H:%M','%Y-%m-%d %H:%M']), metavar='[TIME]')
 @click.option('--comment', "-c")
-#@click.argument('comment', required=False)
 def insert(name, datetime, comment):
 
     '''Insert a dose with NAME.
@@ -171,8 +142,6 @@ class UpdateDateValidator(Validator):
 
         text = document.text
         
-        #click.echo(dt.datetime.strptime(text, '%Y-%m-%d %H:%M'))
-        # if not ( re.match(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', text) or re.match(r'\d{2}:\d{2}', text) ):
         isValidDate = True
 
         try:
@@ -190,8 +159,6 @@ class UpdateDateValidator(Validator):
         if not isValidDate:
 
             raise ValidationError(message = 'Time must be of the form: %Y-%m-%d %H:%M')
-        
-            # raise ValidationError(message = 'Date must be formatted %Y-%m-%d %H:%M or %H:%M')            
 
 @dose.command()
 @click.argument('id', type=int)
@@ -287,7 +254,6 @@ def delete(id):
 @click.argument('search_string')
 @click.argument('start_time', required=False, type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[START_TIME]')
 @click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d','%Y-%m-%d %H:%M']), metavar='[END_TIME]')
-#@click.pass_context
 def search(search_string, start_time, end_time):
 
     """Case insensitive search of dose names and comments between START_TIME and END_TIME.
