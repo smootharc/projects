@@ -11,7 +11,7 @@ if ssh -q $1 sh -c 'exit'; then
 
     target="$1:~"
 
-    if rsync -HarlP --delete --timeout=60 --exclude-from ~/.config/rsync/exclude-home --files-from ~/.config/rsync/from-home ~ "$target"; then
+    if rsync -HaP --delete --timeout=60 --exclude-from ~/.config/rsync/exclude-home --files-from ~/.config/rsync/from-home ~ "$target"; then
 
         exit 0
 
@@ -29,7 +29,7 @@ if ! [ -d "$targetdir" ]; then
 
 fi
  
-if rsync -HarlP --delete --timeout=60 --exclude-from ~/.config/rsync/exclude-home --files-from ~/.config/rsync/from-home ~ "$1"; then
+if rsync -HaP --delete --timeout=60 --exclude-from ~/.config/rsync/exclude-home --files-from ~/.config/rsync/from-home ~ "$1"; then
 
     exit 0
 
