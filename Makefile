@@ -1,4 +1,4 @@
-all: ~/.local/bin/dose ~/.local/bin/vd ~/.local/bin/synchome ~/.local/bin/ddl ~/.local/bin/wf ~/.local/bin/exdl
+all: ~/.local/bin/dose ~/.local/bin/vd ~/.local/bin/synchome ~/.local/bin/ddl ~/.local/bin/wf ~/.local/bin/exdl ~/.local/bin/rss ~/.local/bin/eld
 
 gcalcli: ~/.local/bin/dosenow ~/.local/bin/medical ~/.local/bin/medical.sql
 
@@ -19,3 +19,9 @@ gcalcli: ~/.local/bin/dosenow ~/.local/bin/medical ~/.local/bin/medical.sql
 
 ~/.local/bin/exdl: bin/exdl
 	cp bin/exdl ~/.local/bin/exdl
+
+~/.local/bin/rss: bin/rss
+	cp bin/rss ~/.local/bin/rss
+
+~/.local/bin/eld: bin/eld.fish
+	cp bin/eld.fish ~/.local/bin/eld
