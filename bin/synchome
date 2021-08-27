@@ -19,11 +19,14 @@ if ssh -q $1 sh -c 'exit'; then
 
 fi
 
-targetdir="$(dirname $1)"
+#targetdir="$(dirname $1)"
+#targetdir="$(dirname $1)"
+#[ "$path" != "${path#/}" ]
+if [ "$1" = "${1#/}" ]; then
+#if ! [ -d "$targetdir" ]; then
 
-if ! [ -d "$targetdir" ]; then
-
-    echo "Error: target directory $targetdir does not exist."
+#    echo "Error: target directory $targetdir does not exist."
+    echo "Error: target directory $1 must be an absolute path."
 
     exit 1
 
