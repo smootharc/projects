@@ -7,9 +7,9 @@ import click
 from tabulate import tabulate
 from pathlib import Path
 import datetime as dt
-#from prompt_toolkit import prompt
-#from prompt_toolkit.validation import Validator, ValidationError
-#import re
+from prompt_toolkit import prompt
+from prompt_toolkit.validation import Validator, ValidationError
+import re
 
 def dbopen(readonly=False):
 
@@ -101,6 +101,43 @@ def insert(date, weight, food):
         
         exit(1)
 
+class UpdateDateValidator(Validator):
+
+    def validate(self, document):
+
+        text = document.text
+        
+        isValidDate = True
+
+        try:
+
+            dt.datetime.strptime(text, '%Y-%m-%d')
+
+        except ValueError:
+
+            isValidDate = False
+        
+        if not re.match(r'\d{4}-\d{2}-\d{2}', text):
+
+            isValidDate = False
+
+        if not isValidDate:
+
+            raise ValidationError(message = 'Time must be of the form: %Y-%m-%d')
+
+class UpdateFloatValidator(Validator):
+
+    def validate(self, document):
+
+        text = document.text
+
+        try:
+
+            float(text)
+
+        except ValueError:
+
+            raise ValidationError(message = 'Must be a floating point number')
 
 @weight.command()
 @click.argument('id', type=int)
@@ -126,14 +163,16 @@ def update(id):
     if food == None:
 
         food = ''
+
+    sql = "update dose set name = ?, datetime = datetime(?), comment = ? where id = ?"
     
-    click.echo(f"Updating weight {id}:")
+    click.echo(f"Updating weight record: {id}")
 
-    date = click.prompt("Date: ", type=click.DateTime(['%Y-%m-%d']), default=date )
+    date = prompt("Date: ", default=date, validator=UpdateDateValidator(), validate_while_typing=False)
 
-    weight = click.prompt("Weight: ", default=weight)
+    weight = prompt("Weight: ", default=str(weight), validator=UpdateFloatValidator(), validate_while_typing=False)
 
-    food = click.prompt("Food: ", default=food)
+    food = prompt("Food: ", default=food)
     
     sql = "update weight set date = date(?), weight = ?, food = ? where id = ?"
 
