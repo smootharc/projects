@@ -53,6 +53,70 @@ def weight():
     '''Maintain a weight and food database.
     '''
 
+
+@weight.command()
+@click.argument('search_string')
+@click.argument('start_time', required=False, type=click.DateTime(['%Y-%m-%d']), metavar='[START_TIME]')
+@click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d']), metavar='[END_TIME]')
+def search(search_string, start_time, end_time):
+#def search(search_string : str):
+
+    """Case insensitive search of dose names and comments between START_TIME and END_TIME.
+
+    SEARCH_STRING may contain the operators *, (), AND, OR and NOT.  Valid time format is %Y-%m-%d.  Start time defaults to 1 year ago.
+    End time defaults to the current time.
+    """
+
+    db = dbopen(True)
+
+    if start_time is None:
+
+        start_time = dt.datetime.now() - dt.timedelta(weeks=52)
+
+    if end_time is None:
+
+        end_time = dt.datetime.now()
+    
+#    sql = '''select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose 
+#            where id in ( select docid from doseft where doseft match ? ) 
+#            and datetime between ? and ? order by datetime'''
+#
+
+    if search_string == "":
+    
+        sql = '''select id, date(date) as date, weight, food from weight 
+                where food = ? and date between ? and ? order by date'''
+
+    else:
+
+        sql = '''select id, date(date) as date, weight, food from weight 
+                where id in ( select docid from weightft where weightft match ? )
+                and date between ? and ? order by date'''
+
+    try:
+
+        table = db.execute(sql, (search_string, start_time, end_time)).fetchall()
+
+        if len(table) > 0:
+
+            table = db.execute(sql, (search_string, start_time, end_time))
+#        search_result = db.execute(sql, (search_string,)).fetchall()
+
+        else:
+
+            click.echo(f"None found.")
+
+            exit(0)
+    
+    except sqlite3.OperationalError:
+
+        click.echo('Search error: Use only the operators *, (), AND, OR and NOT in the search string.  Valid time format is %Y-%m-%d.')
+
+        exit(1)
+
+    names = [description[0].upper() for description in table.description]
+    print(tabulate(table,names))
+
 @weight.command()
 def select():
 
@@ -61,13 +125,13 @@ def select():
 
     db = dbopen(True)
     table = db.execute('select * from weight order by date')
-    names = [description[0] for description in table.description]
+    names = [description[0].upper() for description in table.description]
     print(tabulate(table,names))
 
 @weight.command()
 @click.option('--date', '-d', type=click.DateTime(['%Y-%m-%d']), default=str(dt.date.today()))
 @click.option('--weight', '-w', type=click.FLOAT, default=0)
-@click.option('--food', '-f')
+@click.option('--food', '-f', default='')
 def insert(date, weight, food):
 
     '''Insert a record into the weight database.
