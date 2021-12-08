@@ -55,52 +55,59 @@ def weight():
 
 
 @weight.command()
-@click.argument('search_string')
-@click.argument('start_time', required=False, type=click.DateTime(['%Y-%m-%d']), metavar='[START_TIME]')
-@click.argument('end_time', required=False  , type=click.DateTime(['%Y-%m-%d']), metavar='[END_TIME]')
-def search(search_string, start_time, end_time):
+@click.argument('search', required=False, type=click.STRING(None))
+@click.argument('start_date', required=False, type=click.DateTime(['%Y-%m-%d']), metavar='[START_DATE]')
+@click.argument('end_date', required=False  , type=click.DateTime(['%Y-%m-%d']), metavar='[END_DATE]')
+def select(search, start_date, end_date):
 #def search(search_string : str):
 
-    """Case insensitive search of dose names and comments between START_TIME and END_TIME.
-
-    SEARCH_STRING may contain the operators *, (), AND, OR and NOT.  Valid time format is %Y-%m-%d.  Start time defaults to 1 year ago.
-    End time defaults to the current time.
+    """Print records from the weight table.  Optionally limit what records are printed by including only records that satisfy the search
+    criteria specified in the SEARCH parameter and have dates falling between the START_DATE and END_DATE.
+    
+    The SEARCH parameter may be blank or contain the operators *, (), AND, OR and NOT.  Valid date format is %Y-%m-%d.  Start date defaults to 1 year ago.
+    End date defaults to the current date.
     """
 
     db = dbopen(True)
 
-    if start_time is None:
+    if start_date is None:
 
-        start_time = dt.datetime.now() - dt.timedelta(weeks=52)
+        start_date = dt.datetime.now() - dt.timedelta(weeks=52)
+#        start_date = f"{dt.datetime.today().year}-01-01"
 
-    if end_time is None:
+    if end_date is None:
 
-        end_time = dt.datetime.now()
+        end_date = dt.datetime.now()
     
-#    sql = '''select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose 
-#            where id in ( select docid from doseft where doseft match ? ) 
-#            and datetime between ? and ? order by datetime'''
-#
+    if search is None:
 
-    if search_string == "":
+        sql = '''select id, date(date) as date, weight, food from weight 
+                where date between ? and ? order by date'''
+
+        parameters = (start_date, end_date)
+
+    elif search == "":
     
         sql = '''select id, date(date) as date, weight, food from weight 
                 where food = ? and date between ? and ? order by date'''
 
+        parameters = (search, start_date, end_date)
+    
     else:
 
         sql = '''select id, date(date) as date, weight, food from weight 
                 where id in ( select docid from weightft where weightft match ? )
                 and date between ? and ? order by date'''
 
+        parameters = (search, start_date, end_date)
+
     try:
 
-        table = db.execute(sql, (search_string, start_time, end_time)).fetchall()
+        table = db.execute(sql, parameters).fetchall()
 
         if len(table) > 0:
 
-            table = db.execute(sql, (search_string, start_time, end_time))
-#        search_result = db.execute(sql, (search_string,)).fetchall()
+            table = db.execute(sql, parameters)
 
         else:
 
@@ -110,23 +117,23 @@ def search(search_string, start_time, end_time):
     
     except sqlite3.OperationalError:
 
-        click.echo('Search error: Use only the operators *, (), AND, OR and NOT in the search string.  Valid time format is %Y-%m-%d.')
+        click.echo('Search error: Use only an empty string or the operators *, (), AND, OR and NOT in the search parameter.  The valid date format is %Y-%m-%d.')
 
         exit(1)
 
     names = [description[0].upper() for description in table.description]
     print(tabulate(table,names))
 
-@weight.command()
-def select():
-
-    '''Print a table of all records in the weight database.
-    '''
-
-    db = dbopen(True)
-    table = db.execute('select * from weight order by date')
-    names = [description[0].upper() for description in table.description]
-    print(tabulate(table,names))
+#@weight.command()
+#def select():
+#
+#    '''Print a table of all records in the weight database.
+#    '''
+#
+#    db = dbopen(True)
+#    table = db.execute('select * from weight order by date')
+#    names = [description[0].upper() for description in table.description]
+#    print(tabulate(table,names))
 
 @weight.command()
 @click.option('--date', '-d', type=click.DateTime(['%Y-%m-%d']), default=str(dt.date.today()))
