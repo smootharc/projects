@@ -56,24 +56,32 @@ def weight():
 
 @weight.command()
 @click.argument('search', required=False, type=click.STRING(None))
-@click.argument('start_date', required=False, type=click.DateTime(['%Y-%m-%d']), metavar='[START_DATE]')
-@click.argument('end_date', required=False  , type=click.DateTime(['%Y-%m-%d']), metavar='[END_DATE]')
-def select(search, start_date, end_date):
+#@click.argument('start_date', required=False, type=click.DateTime(['%Y-%m-%d']), metavar='[START_DATE]')
+@click.option('--begin_date', '-b', type=click.DateTime(['%Y-%m-%d']))
+#@click.argument('end_date', required=False  , type=click.DateTime(['%Y-%m-%d']), metavar='[END_DATE]')
+@click.option('--end_date', '-e', type=click.DateTime(['%Y-%m-%d']))
+def select(search, begin_date, end_date):
 #def search(search_string : str):
 
     """Print records from the weight table.  Optionally limit what records are printed by including only records that satisfy the search
-    criteria specified in the SEARCH parameter and have dates falling between the START_DATE and END_DATE.
+    criteria specified in the SEARCH parameter and have dates falling between the begin_date and end_date.
     
-    The SEARCH parameter may be blank or contain the operators *, (), AND, OR and NOT.  Valid date format is %Y-%m-%d.  Start date defaults to 1 year ago.
+    The SEARCH parameter may be blank or contain the operators *, (), AND, OR and NOT.  Valid date format is %Y-%m-%d.  Start date defaults to 365 days ago.
     End date defaults to the current date.
     """
 
     db = dbopen(True)
 
-    if start_date is None:
+    if begin_date is None and end_date is not None:
 
-        start_date = dt.datetime.now() - dt.timedelta(weeks=52)
-#        start_date = f"{dt.datetime.today().year}-01-01"
+#        end_date = dt.datetime.now()
+        begin_date = end_date - dt.timedelta(days=365)
+
+    if begin_date is None and end_date is None:
+
+        end_date = dt.datetime.now()
+        begin_date = end_date - dt.timedelta(days=365)
+#        begin_date = f"{dt.datetime.today().year}-01-01"
 
     if end_date is None:
 
@@ -84,14 +92,14 @@ def select(search, start_date, end_date):
         sql = '''select id, date(date) as date, weight, food from weight 
                 where date between ? and ? order by date'''
 
-        parameters = (start_date, end_date)
+        parameters = (begin_date, end_date)
 
     elif search == "":
     
         sql = '''select id, date(date) as date, weight, food from weight 
                 where food = ? and date between ? and ? order by date'''
 
-        parameters = (search, start_date, end_date)
+        parameters = (search, begin_date, end_date)
     
     else:
 
@@ -99,7 +107,7 @@ def select(search, start_date, end_date):
                 where id in ( select docid from weightft where weightft match ? )
                 and date between ? and ? order by date'''
 
-        parameters = (search, start_date, end_date)
+        parameters = (search, begin_date, end_date)
 
     try:
 
