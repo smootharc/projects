@@ -80,27 +80,45 @@ def select(search, begin_date, end_date):
 
     if end_date is None:
 
-        end_date = dt.datetime.now()
+        end_date = dt.datetime.now() #+ dt.timedelta(days=1)
+
+    #include begin and end dates.  Don't know why the begin date is not included unless I subtract one from it.
+
+    begin_date = begin_date - dt.timedelta(days=1)
+
+#    end_date = end_date + dt.timedelta(days=1)
     
     if search is None:
 
+#        sql = '''select id, date(date) as date, weight, food from weight 
+#                where date between ? and ? order by date'''
         sql = '''select id, date(date) as date, weight, food from weight 
-                where date between ? and ? order by date'''
+                where date >= ? and date <= ? order by date'''
 
         parameters = (begin_date, end_date)
 
     elif search == "":
     
+#        sql = '''select id, date(date) as date, weight, food from weight 
+#                where food = ? and date between ? and ? order by date'''
+#        sql = '''select id, date(date) as date, weight, food from weight 
+#                where id in ( select docid from weightft where weightft match ? )
+#                and date >= ? and date <= ? order by date'''
         sql = '''select id, date(date) as date, weight, food from weight 
-                where food = ? and date between ? and ? order by date'''
+                where food = "" and date >= ? and date <= ? order by date'''
 
-        parameters = (search, begin_date, end_date)
+        parameters = (begin_date, end_date)
+
+#        print(sql, parameters)
     
     else:
 
+#        sql = '''select id, date(date) as date, weight, food from weight 
+#                where id in ( select docid from weightft where weightft match ? )
+#                and date between ? and ? order by date'''
         sql = '''select id, date(date) as date, weight, food from weight 
                 where id in ( select docid from weightft where weightft match ? )
-                and date between ? and ? order by date'''
+                and date >= ? and date <= ? order by date'''
 
         parameters = (search, begin_date, end_date)
 
@@ -125,7 +143,10 @@ def select(search, begin_date, end_date):
         exit(1)
 
     names = [description[0].upper() for description in table.description]
+
     print(tabulate(table,names))
+
+#    print(sql,parameters)
 
 @weight.command()
 @click.option('--date', '-d', type=click.DateTime(['%Y-%m-%d']), default=str(dt.date.today()))
