@@ -56,15 +56,15 @@ def weight():
 
 @weight.command()
 @click.argument('search', required=False, type=click.STRING(None))
-@click.option('--begin_date', '-b', type=click.DateTime(['%Y-%m-%d']))
-@click.option('--end_date', '-e', type=click.DateTime(['%Y-%m-%d']))
+@click.option('--begin_date', '-b', type=click.DateTime(['%Y-%m-%d']), metavar='[BEGIN_DATE]')
+@click.option('--end_date', '-e', type=click.DateTime(['%Y-%m-%d']), metavar='[END_DATE]')
 def select(search, begin_date, end_date):
 
     """Print records from the weight table.  Optionally limit what records are printed by including only records that satisfy the search
-    criteria specified in the SEARCH parameter and have dates falling between the begin_date and end_date.
+    criteria specified in the SEARCH parameter and have dates falling between the BEGIN_DATE and END_DATE.
     
-    The SEARCH parameter may be blank or contain the operators *, (), AND, OR and NOT.  Valid date format is %Y-%m-%d.  Start date defaults to 365 days ago.
-    End date defaults to the current date.
+    The SEARCH parameter may be blank or contain the operators *, (), AND, OR and NOT.  Valid date format is %Y-%m-%d.  START_DATE defaults to 365 days ago.
+    END_DATE defaults to the current date.
     """
 
     db = dbopen(True)
@@ -90,8 +90,6 @@ def select(search, begin_date, end_date):
     
     if search is None:
 
-#        sql = '''select id, date(date) as date, weight, food from weight 
-#                where date between ? and ? order by date'''
         sql = '''select id, date(date) as date, weight, food from weight 
                 where date >= ? and date <= ? order by date'''
 
@@ -99,23 +97,13 @@ def select(search, begin_date, end_date):
 
     elif search == "":
     
-#        sql = '''select id, date(date) as date, weight, food from weight 
-#                where food = ? and date between ? and ? order by date'''
-#        sql = '''select id, date(date) as date, weight, food from weight 
-#                where id in ( select docid from weightft where weightft match ? )
-#                and date >= ? and date <= ? order by date'''
         sql = '''select id, date(date) as date, weight, food from weight 
                 where food = "" and date >= ? and date <= ? order by date'''
 
         parameters = (begin_date, end_date)
 
-#        print(sql, parameters)
-    
     else:
 
-#        sql = '''select id, date(date) as date, weight, food from weight 
-#                where id in ( select docid from weightft where weightft match ? )
-#                and date between ? and ? order by date'''
         sql = '''select id, date(date) as date, weight, food from weight 
                 where id in ( select docid from weightft where weightft match ? )
                 and date >= ? and date <= ? order by date'''
