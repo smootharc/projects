@@ -11,9 +11,15 @@ if ssh -q $1 sh -c 'exit'; then
 
     target="$1:~"
 
+    echo $target
+
     if rsync -HaPr --delete --timeout=60 --exclude-from ~/.config/rsync/exclude-home --files-from ~/.config/rsync/from-home ~ "$target"; then
 
         exit 0
+
+    else
+
+        exit 1
 
     fi
 
