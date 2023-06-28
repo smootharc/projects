@@ -1,13 +1,11 @@
 #!/usr/bin/perl
 
-use strict;
-use warnings;
+use 5.36.1;
 use Getopt::Long;
 use File::Temp;
 use File::MimeInfo;
 use File::stat;
-use Cwd 'abs_path'; 
-use 5.22.1;
+use Cwd 'abs_path';
 
 sub processdir
 {
