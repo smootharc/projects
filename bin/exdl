@@ -1,38 +1,3 @@
 #!/bin/sh
 
-#touch ~/.cache/exdl.ts
-
-while true
-do
-
-#    if [ "$(find ~/Downloads -mindepth 1 -name '*zip' -o -name '*rar' )" ]
-    if [ "$(find ~/Downloads -maxdepth 0 -empty)" ]
-    then
-        
-        systemctl --user stop exdl.service 
-
-    else
-
-        sleep 1
-
-#        find ~/Downloads -mindepth 1 -ctime +1 -delete
-        
-#        find ~/Downloads -iname "*.par2" -cmin +30 -delete
-        
-#        find ~/Downloads -iname "*.zip" -cmin +30 -delete
-
-#        find ~/Downloads -iname "*.rar" -cmin +30 -delete
-
-#        find ~/Downloads -regextype posix-extended -regex ".*r[[:digit:]]{2}" -cmin +30 -delete
-
-#        find ~/Downloads -name "*par2" -not -name "*vol*par2" -execdir par2repair '{}' \;
-        
-        find ~/Downloads -iname "_unpack" -prune , -type f -cmin +1 -name "*.zip" -execdir unzip -n '{}' \; -execdir rm '{}' \;
-
-        find ~/Downloads -iname "_unpack" -prune , -type f -cmin +1 -regex ".*part.*[^1-9]1.rar" -execdir unrar x -o- -p- '{}' \; -execdir rm '{}' \;
-
-        find ~/Downloads -iname "_unpack" -prune , -type f -cmin +1 -name "*.rar" -not -name "*part*.rar" -execdir unrar x -o- -p- '{}' \; -execdir rm '{}' \;
-
-    fi
-
-done
+systemctl --user start exdl

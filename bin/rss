@@ -1,3 +1,0 @@
-#!/usr/bin/env -S doas sh
-
-echo "- - -" | tee /sys/class/scsi_host/host3/scan > /dev/null
