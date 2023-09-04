@@ -131,7 +131,7 @@ def main(minutes, files, directory, nosort):
 
                         continue
 
-            subprocess.run(['mpv', fd.name])
+            subprocess.run(['mpv', fd.name, '--really-quiet'])
     
     else:
 
