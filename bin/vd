@@ -2,14 +2,18 @@
 
 # vi:syntax=python
 
+import typer
+from typing_extensions import Annotated
+from typing import Optional
+import rich
 import tempfile
-import click
+#import click
 import mimetypes
 import subprocess
 import re
 from pathlib import Path
 
-def getfiles(directory, names):
+def getfiles(directory: Path, names: str ):
 
     try:
 
@@ -23,37 +27,27 @@ def getfiles(directory, names):
 
     except:
 
-        click.echo("Invalid regular expression in option: -f TEXT.", err=True)
+        typer.echo("Invalid regular expression in option: --files.")
 
-        exit(1)
+        raise typer.Exit(1)
 
     files = ( f for f in Path(directory).expanduser().rglob('*') if regex.search(str(f)) and '_unpack' not in str(f) )
 
     for f in files:
 
-        if f.is_dir():
-
-            getfiles(f.name,'.*')
-
-            continue
-
         if f.is_file():
 
             yield f.resolve()
 
-@click.command()
+def main(
+        minutes: Annotated[int, typer.Option('--minutes', '-m', help="Delete files in the ~/Downloads folder older than INTEGER minutes.")] = -1,
+        files: Annotated[str, typer.Option('--files', '-f', help="Display only files with pathnames matching TEXT regular expression.")] = ".*",
+        directory: Annotated[Path, typer.Option('--directory', '-d', help="Search directory PATH.")] = Path('~/Downloads').expanduser(),
+        sort: Annotated[bool, typer.Option('--sort', '-n', help="Sort files with the newest change time first.")] = True,
+        ):
 
-@click.option('-n', 'nosort', is_flag=True, help='No sort.')
+    '''Display images and videos from a directory that has absolutes pathnames matching some regex.  Normally sorted newest to oldest.'''
 
-@click.option('-m','--minutes', type=int, required=False, help='Delete files older than INTEGER minutes.')
-
-@click.option('-d', '--directory', default=Path('~/Downloads').expanduser(), type=click.Path(exists=True), show_default=True, help='Directory to search.' )
-
-@click.option('-f', '--files', required=False, default='.*', show_default=True, help='Return absolute pathnames matching the regex TEXT.')
-
-def main(minutes, files, directory, nosort):
-
-    '''Display images and videos from a directory that have absolutes pathnames matching some regex.  Normally sorted newest to oldest.'''
 
     files = getfiles(directory, files)
         
@@ -81,11 +75,12 @@ def main(minutes, files, directory, nosort):
 
         except FileNotFoundError as e:
 
-            click.echo(e)
+            typer.echo(e)
 
 
     if len(images) > 0:
-        if not nosort:
+
+        if sort:
 
             images.sort(key = lambda fctime: fctime[1], reverse = True)
 
@@ -111,7 +106,7 @@ def main(minutes, files, directory, nosort):
 
     if len(videos) > 0:
 
-        if not nosort:
+        if sort:
 
             videos.sort(key = lambda fctime: fctime[1], reverse = True)
 
@@ -137,13 +132,9 @@ def main(minutes, files, directory, nosort):
 
         print('No videos found!')
 
-    if minutes is None:
-
-        subprocess.run(['ddl'])
-
-    else:
+    if minutes >= 0:
 
         subprocess.run(['ddl', str(minutes)])
 
 if __name__ == '__main__':
-    main()
+    typer.run(main)
