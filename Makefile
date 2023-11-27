@@ -1,21 +1,11 @@
-all: ~/.local/bin/dose ~/.local/bin/vd ~/.local/bin/synchome ~/.local/bin/ddl ~/.local/bin/wf ~/.local/bin/eld
+#all: ~/.local/bin/dose ~/.local/bin/vd ~/.local/bin/synchome ~/.local/bin/ddl ~/.local/bin/wf ~/.local/bin/eld
+all: source/vd.nim
+	nim c -o=bin/vd -d=release source/vd.nim
 
-gcalcli: ~/.local/bin/dosenow ~/.local/bin/medical ~/.local/bin/medical.sql
-
-~/.local/bin/dose: bin/dose
-	cp bin/dose ~/.local/bin/dose
-
-~/.local/bin/vd: bin/vd
-	cp bin/vd ~/.local/bin/vd
-
-~/.local/bin/synchome: bin/synchome
-	cp bin/synchome ~/.local/bin/synchome
-
-~/.local/bin/ddl: bin/ddl
-	cp bin/ddl ~/.local/bin/ddl
-
-~/.local/bin/wf: bin/wf
-	cp bin/wf ~/.local/bin/wf
-
-~/.local/bin/eld: bin/eld.fish
-	cp bin/eld.fish ~/.local/bin/eld
+install: source/dose.py source/synchome.sh source/ddl.bash source/wf.py source/eld.fish bin/vd
+	install -vC source/dose.py ~/.local/bin/dose
+	install -vC bin/vd ~/.local/bin/vd
+	install -vC source/synchome.sh ~/.local/bin/synchome
+	install -vC bin/ddl.bash ~/.local/bin/ddl
+	install -vC source/wf.py ~/.local/bin/wf
+	install -vC bin/eld.fish ~/.local/bin/eld
