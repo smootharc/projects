@@ -7,7 +7,6 @@ from typing_extensions import Annotated
 from typing import Optional
 import rich
 import tempfile
-#import click
 import mimetypes
 import subprocess
 import re
