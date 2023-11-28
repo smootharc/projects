@@ -7,10 +7,10 @@ all: source/vd.nim
 
 install: source/dose.py source/synchome.sh source/ddl.bash source/wf.py source/eld.fish bin/vd bin/wf bin/dose
 	install -vC bin/vd ~/.local/bin/vd
-	install -vC bin/wf ~/.local/bin/wf
-	install -vC bin/dose ~/.local/bin/dose
+#	install -vC bin/wf ~/.local/bin/wf
+#	install -vC bin/dose ~/.local/bin/dose
 	install -vC source/dose.py ~/.local/bin/dose
 	install -vC source/synchome.sh ~/.local/bin/synchome
-	install -vC bin/ddl.bash ~/.local/bin/ddl
+	install -vC source/ddl.bash ~/.local/bin/ddl
 	install -vC source/wf.py ~/.local/bin/wf
-	install -vC bin/eld.fish ~/.local/bin/eld
+	install -vC source/eld.fish ~/.local/bin/eld
