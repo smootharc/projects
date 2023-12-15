@@ -16,10 +16,10 @@ dose:
 .PHONY: install
 install: 
 	install -vC bin/vd ~/.local/bin/vd
-#	install -vC bin/wf ~/.local/bin/wf
+	install -vC bin/wf ~/.local/bin/wf
 #	install -vC bin/dose ~/.local/bin/dose
 	install -vC src/eld.fish ~/.local/bin/eld
 	install -vC src/ddl.bash ~/.local/bin/ddl
 	install -vC src/dose.py ~/.local/bin/dose
 	install -vC src/synchome.sh ~/.local/bin/synchome
-	install -vC src/wf.py ~/.local/bin/wf
+	# install -vC src/wf.py ~/.local/bin/wf
