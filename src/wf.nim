@@ -159,11 +159,22 @@ proc select(beginstr, endstr, searchstr: Option[string]) =
 
     try:    
 
-      sqlstring = sql"""select id, date(date) as date, weight, food from weight
-              where id in ( select docid from weightft where weightft match ? )
-              and date >= ? and date <= ? order by date"""
+      var searchstring = searchstr.get
 
-      rows = db.getAllRows(sqlstring, searchstr.get, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
+      if searchstring.startsWith("NOT "):
+
+        searchstring.removePrefix("NOT ")
+
+        sqlstring = sql"""select id, date(date) as date, weight, food from weight
+                where id not in ( select docid from weightft where weightft match ? )
+                and date >= ? and date <= ? order by date"""
+      else:
+
+        sqlstring = sql"""select id, date(date) as date, weight, food from weight
+                where id in ( select docid from weightft where weightft match ? )
+                and date >= ? and date <= ? order by date"""
+
+      rows = db.getAllRows(sqlstring, searchstring, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
 
     except DbError as e:
 
