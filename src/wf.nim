@@ -184,7 +184,7 @@ proc select(beginstr, endstr, searchstr: Option[string]) =
       
   for row in rows:
 
-    echo alignleft(row[0],6), alignleft(row[1], 9),  align(row[2], 8), "  ", row[3]
+    echo alignleft(row[0],6), alignleft(row[1], 11),  align(row[2], 7), "  ", row[3]
   
 proc insert(date: Option[DateTime], weight: Option[float], food: string = "") =
 
