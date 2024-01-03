@@ -30,20 +30,25 @@ proc help(subcommand: string, exitCode: int = QuitSuccess, ) =
   END_DATE defaults to the current date.
 
   Options:
-    -b, [BEGIN_DATE]
-    -e, [END_DATE]
+    -b[=|:]BEGIN_DATE
+    -e[=|:]END_DATE
     -h, Show this message and exit.
+
+  Single letter options that take a parameter require an equal sign or a colon between the option and the argument.
   """
 
     of "insert":
 
-      echo "Usage: " & appName & " insert [DATE] [WEIGHT] [FOOD]\n"
+      echo "Usage: " & appName & " insert [OPTIONS] [FOOD]\n"
       echo """
-  Insert records into the weight table. All arguments are optional.
-  The defaults are DATE = today, WEIGHT = zero and [FOOD] = "". 
+  Insert records into the weight table.  The defaults are DATE = today, WEIGHT = zero and [FOOD] = "". 
 
   Options:
+    -d[=|:]DATE
+    -w[=|:]WEIGHT
     -h Show this message and exit.
+
+  Single letter options that take a parameter require an equal sign or a colon between the option and the argument.
   """
 
     of "update":
@@ -456,6 +461,10 @@ proc main() =
 
                   quit("Invalid weight. Weights must be floating point numbers.")
 
+              else:
+
+                help("insert")
+            
           of cmdArgument:
 
             if p.key != "insert":
@@ -514,4 +523,7 @@ proc main() =
 
       delete(id)
 
-main()
+when isMainModule:
+  # when defined(release):
+    # echo "Release"
+  main()

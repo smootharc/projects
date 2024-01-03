@@ -6,6 +6,7 @@ import std/times
 import std/tempfiles
 import std/algorithm
 import std/re
+import ddl
 
 #import std/sequtils
 #import std/dirs
@@ -201,7 +202,8 @@ proc main() =
   else:
     echo "No videos found!"
   
-  if dir == expandTilde("~/Downloads"):
-    discard execShellCmd("ddl " & $minutes)
+  # if dir == expandTilde("~/Downloads"):
+    # discard execShellCmd("ddl " & $minutes)
+  ddl(minutes)
 
 main()
