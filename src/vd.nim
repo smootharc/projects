@@ -80,6 +80,8 @@ proc getimagesandvideos(dir: string, substring: string = ".*") = #: (seq[file], 
         images.add(file)
       elif "video" in mimetype:
         videos.add(file)
+      elif dir == expandTilde("~/Downloads"):
+        f.removeFile()
             
   # result = (images, videos)
  
