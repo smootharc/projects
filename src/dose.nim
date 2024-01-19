@@ -95,14 +95,16 @@ proc help(subcommand: string, exitCode: int = QuitSuccess, ) =
   """
 
     of "count":
-      echo "Usage: " & appName & " count [OPTIONS] NAME [START_TIME] [END_TIME]\n"
+      echo "Usage: " & appName & " count [OPTIONS] DOSENAME\n"
       echo """
-  Print statistics regarding doses for NAME between two times.
+  Print statistics regarding doses for DOSENAME between two times.
 
   Valid time formats are yyyy-MM-dd or yyyy-MM-dd HH:m. If no dates are given,
   the last 30 days are counted.
 
   Options:
+    -b[=|:]BEGIN_TIME
+    -e[=|:]END_TIME
     --h Show this message and exit.
   """
 
@@ -398,98 +400,112 @@ proc delete(id: int) =
 
   db.close()
 
-proc count(name: string, starttime, endtime: Option[string]) =
+proc count(dosename: string, begintime, endtime: DateTime) =
 
-  var
-    endtimed: DateTime
-    starttimed: DateTime
+  # var
+  #   endtimed: DateTime
+  #   starttimed: DateTime
 
-  if starttime.isSome: 
+  # if starttime.isSome: 
 
-    if starttime.get.len == 10:
+  #   if starttime.get.len == 10:
 
-      try:
+  #     try:
 
-          starttimed = parse(starttime.get, "yyyy-MM-dd")
+  #         starttimed = parse(starttime.get, "yyyy-MM-dd")
 
-      except TimeParseError as e:
+  #     except TimeParseError as e:
 
-        quit("$1 count: $2." % [appName, e.msg])
+  #       quit("$1 count: $2." % [appName, e.msg])
 
-    elif starttime.get.len == 16:
+  #   elif starttime.get.len == 16:
 
-      try:
+  #     try:
 
-          starttimed = parse(starttime.get, "yyyy-MM-dd HH:mm")
+  #         starttimed = parse(starttime.get, "yyyy-MM-dd HH:mm")
 
-      except TimeParseError as e:
+  #     except TimeParseError as e:
 
-        quit("$1 count: $2." % [appName, e.msg])
+  #       quit("$1 count: $2." % [appName, e.msg])
 
-    else:
+  #   else:
 
-      quit("$1 count: Invalid time format $2.  Type dose count -h for help." % [appName, starttime.get] )
+  #     quit("$1 count: Invalid time format $2.  Type dose count -h for help." % [appName, starttime.get] )
 
-  if endtime.isSome: 
+  # if endtime.isSome: 
 
-    if endtime.get.len == 10:
+  #   if endtime.get.len == 10:
 
-      try:
+  #     try:
 
-          endtimed = parse(endtime.get, "yyyy-MM-dd")
+  #         endtimed = parse(endtime.get, "yyyy-MM-dd")
 
-      except TimeParseError as e:
+  #     except TimeParseError as e:
 
-        quit("$1 count: $2." % [appName, e.msg])
+  #       quit("$1 count: $2." % [appName, e.msg])
 
-    elif endtime.get.len == 16:
+  #   elif endtime.get.len == 16:
 
-      try:
+  #     try:
 
-          endtimed = parse(endtime.get, "yyyy-MM-dd HH:mm")
+  #         endtimed = parse(endtime.get, "yyyy-MM-dd HH:mm")
 
-      except TimeParseError as e:
+  #     except TimeParseError as e:
 
-        quit("$1 count: $2." % [appName, e.msg])
+  #       quit("$1 count: $2." % [appName, e.msg])
 
-    else:
+  #   else:
 
-      quit("$1 count: Invalid time format $2.  Type dose count -h for help." % [appName, endtime.get] )
+  #     quit("$1 count: Invalid time format $2.  Type dose count -h for help." % [appName, endtime.get] )
 
-  if endtime.isNone:
+  # if endtime.isNone:
 
-    endtimed = now()
+  #   endtimed = now()
 
-  if starttime.isNone:
+  # if starttime.isNone:
 
-    starttimed = endtimed - initDuration(days = 30) 
+  #   starttimed = endtimed - initDuration(days = 30) 
+  if endtime < begintime:
+
+    echo("$1 count: The END_TIME must be later than the BEGIN_TIME.\n" % appName)
+
+    help("count", QuitFailure)
+  
     
   let sql = sql"""select count(id) as count from dose where name = ? and datetime between ? and ?"""
 
+  let begintimestr = begintime.format("yyyy-MM-dd HH:mm")
+
+  let endtimestr = endtime.format("yyyy-MM-dd HH:mm")
+
+  # echo dosename, " ", begintimestr, " ", endtimestr
+
   let db = opendb(true)
 
-  let count = db.getValue(sql, name, starttimed.format("yyyy-MM-dd HH:mm"), endtimed.format("yyyy-MM-dd HH:mm"))
+  let count = db.getValue(sql, dosename, begintimestr, endtimestr)
+  # let count = db.getValue(sql, dosename, begintime.format("yyyy-MM-dd HH:mm"), endtime.format("yyyy-MM-dd HH:mm"))
 
   if count == "0":
 
-      quit(appName & " count: No such medication taken during that time period.")
+      quit("$1 count: Medication '$2' was not taken during that time period." % [appName, dosename])
 
-  let days = formatFloat(inSeconds(endtimed - starttimed) /  86400, ffDecimal, precision = 2)
+  let days = formatFloat(inSeconds(endtime - begintime) /  86400, ffDecimal, precision = 2)
 
   let dosesperday = formatFloat(count.parseFloat() / days.parseFloat(), ffDecimal, precision = 2)
 
-  echo "     Name: ", name
-  echo "     From: ", starttimed.format("yyyy-MM-dd HH:mm")
-  echo "       To: ", endtimed.format("yyyy-MM-dd HH:mm")
+  let duration = toParts(endtime - begintime)
+
+  echo "     Name: ", dosename
+  echo "     From: ", begintime.format("yyyy-MM-dd HH:mm")
+  echo "       To: ", endtime.format("yyyy-MM-dd HH:mm")
   echo "    Doses: ", count
-  echo "     Days: ", days
+  echo " Duration: ", duration[Weeks] * 7 + duration[Days], " Days ", duration[Hours], " Hours ", duration[Minutes], " Minutes." 
+  # echo "     Days: ", duration[Weeks], " Weeks ", duration[Days], " Days ", duration[Hours], " Hours ", duration[Minutes], " Minutes." 
   echo "Doses/Day: ", dosesperday
 
 proc main() =
 
   const subCommands = ["select", "insert", "update", "delete", "count"]
-
-  # echo commandLineParams(), " ", paramCount(), " ", paramStr(1)
 
   if paramCount() == 0:
 
@@ -655,40 +671,122 @@ proc main() =
 
     of "count":
 
-      case paramCount()
+      var dosename: string
+      var endtime: DateTime = now()# + initDuration(days = 1)
+      var begintime: DateTime = endtime - initDuration(days= 30)
 
-       of 2:
+      var p = initOptParser()
 
-          if paramStr(2) == "-h":
+      while true:
 
-            help("count")
+        p.next
 
-          else:
+        case p.kind
 
-            let name = paramStr(1)
+          of cmdEnd: break
 
-            count(name, none(string), none(string))
+          of cmdLongOption:
+
+            quit("$1 insert: The option '--$2' is not supported.  Try $1 count -h for more help." % [appName, p.key])
+
+          of cmdShortOption:
+
+            case p.key
+
+              of "b":
+
+                var timestr: string
+
+                if p.val.len == 10:
+
+                  timestr = p.val & " 00:00"
+
+                else:
+
+                  timestr = p.val
+
+                try:
           
-       of 3:
+                  begintime = parse(timestr, "yyyy-MM-dd HH:mm")
 
-          let name = paramStr(2)
+                except TimeParseError as e:
 
-          let starttime = some(paramStr(3))
+                  # quit(appName & " select: " & e.msg)
+                  quit("$1 $2" % [appName, e.msg])
+                    
 
-          count(name, starttime, none(string))
+              of "e":
 
-       of 4:
+                var timestr: string
 
-          let name = paramStr(2)
+                if p.val.len == 10:
 
-          let starttime = some(paramStr(3))
+                  timestr = p.val & " 00:00"
 
-          let endtime = some(paramStr(4))
+                else:
 
-          count(name, starttime, endtime)
+                  timestr = p.val
 
-       else:
+                try:
+          
+                  endtime = parse(timestr, "yyyy-MM-dd HH:mm")
 
-        help("count", QuitFailure)
+                except TimeParseError as e:
+
+                  # quit(appName & " select: " & e.msg)
+                  quit("$1 $2" % [appName, e.msg])
+
+              of "h":
+
+                help("count")
+
+              else:
+
+                quit("$1 count: Valid options are -b, -e and -h.  Try $1 count -h for more help." % appName)
+
+          of cmdArgument:
+
+            if p.key != "count":
+
+              dosename.add(" " & p.key)
+
+      dosename= dosename.strip()
+      # echo "Begin Time: ", begintime, " End Time: ", endtime
+
+      count(dosename, begintime, endtime)
+
+       # of 2:
+
+       #    if paramStr(2) == "-h":
+
+       #      help("count")
+
+       #    else:
+
+       #      let name = paramStr(1)
+
+       #      count(name, none(string), none(string))
+          
+       # of 3:
+
+       #    let name = paramStr(2)
+
+       #    let starttime = some(paramStr(3))
+
+       #    count(name, starttime, none(string))
+
+       # of 4:
+
+       #    let name = paramStr(2)
+
+       #    let starttime = some(paramStr(3))
+
+       #    let endtime = some(paramStr(4))
+
+       #    count(name, starttime, endtime)
+
+       # else:
+
+       #  help("count", QuitFailure)
 
 main()
