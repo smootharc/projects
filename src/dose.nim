@@ -129,33 +129,29 @@ proc help(subcommand: string, exitCode: int = QuitSuccess, ) =
 
   quit(exitCode)
 
-proc select(beginstr, endstr, searchstr: Option[string]) =
+proc select(begintime, endtime: DateTime, search: Option[string]) =
 
-  var
-    endtime: DateTime = now() + initDuration(days = 1)
-    begintime: DateTime = endtime - initDuration(days= 30)
-    sqlstring: SqlQuery
+  var sqlstring: SqlQuery
 
-  if beginstr.isSome():
+  # if beginstr.isSome():
 
-    try:
+  #   try:
 
-      begintime = parse(beginstr.get, "yyyy-MM-dd HH:mm")
+  #     begintime = parse(beginstr.get, "yyyy-MM-dd HH:mm")
 
-    except TimeParseError as e:
+  #   except TimeParseError as e:
 
-      # quit(appName & " select: " & e.msg)
-      quit("$1 select: $2" % [appName, e.msg])
+  #     quit("$1 select: $2" % [appName, e.msg])
       
-  if endstr.isSome():
+  # if endstr.isSome():
 
-    try:
+  #   try:
 
-      endtime = parse(endstr.get, "yyyy-MM-dd HH:mm")
+  #     endtime = parse(endstr.get, "yyyy-MM-dd HH:mm")
 
-    except TimeParseError as e:
+  #   except TimeParseError as e:
 
-      quit("$1 select: $2" % [appName, e.msg])
+  #     quit("$1 select: $2" % [appName, e.msg])
 
   if endtime < begintime:
 
@@ -168,7 +164,7 @@ proc select(beginstr, endstr, searchstr: Option[string]) =
 
   var rows: seq[Row]
 
-  if searchstr.isNone():
+  if search.isNone():
   
     sqlstring = sql"select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose where date >= ? and date <= ? order by datetime"
 
@@ -180,15 +176,15 @@ proc select(beginstr, endstr, searchstr: Option[string]) =
 
   #   rows = db.getAllRows(sqlstring, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
   
-  elif searchstr.isSome():
+  elif search.isSome():
 
-    if beginstr.isNone():
+    # if begin.isNone():
 
-      begintime = endtime - initDuration(weeks= 52)
+    # begintime = endtime - initDuration(years= 52)
 
     try:    
 
-      var searchstring = searchstr.get
+      var searchstring = search.get
 
       if searchstring.startsWith("NOT "):
 
@@ -216,7 +212,7 @@ proc select(beginstr, endstr, searchstr: Option[string]) =
 
   if rows.len == 0:
 
-    echo appName, " select: No records found containg: ", searchstr.get
+    echo appName, " select: No records found containg: ", search.get
       
   var lastdate = ""
 
@@ -238,41 +234,15 @@ proc select(beginstr, endstr, searchstr: Option[string]) =
     
     echo alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", row[3], "\t", row[4]
 
-proc insert(name: string, datetime: var string, comment: string = "") =
-
-  try:
-
-    if datetime == "":
-
-      datetime = now().format("yyyy-MM-dd HH:mm")
-
-    elif datetime.len == 5:
-
-      datetime = now().format("yyyy-MM-dd ") & datetime
-
-    elif datetime.len == 16:
-  
-      datetime = datetime.format("yyyy-MM-dd HH:mm")
-
-    else:
-
-      quit("$1 insert: Invalid time format $2.  Type dose insert -h for help." % [appName, datetime])
-          
-  except TimeFormatParseError as e:
-
-        quit(appName & " insert: " & e.msg)
-      
-  if datetime.parse("yyyy-MM-dd HH:mm") > now():
-
-    quit(appName & " insert: " & "TIME can't be in the future.")
-  
-  var db = opendb()
+proc insert(name: string, datetime: DateTime, comment: string = "") =
 
   var sql = sql"insert into dose (name, datetime, comment) values(?, ?, ?)"
 
+  var db = opendb()
+
   try:
   
-    let id = db.tryInsert(sql, "id", name, datetime, comment)
+    let id = db.tryInsertID(sql, name, datetime.format("yyyy-MM-dd HH:mm"), comment)
 
     if id >= 0:
 
@@ -499,7 +469,7 @@ proc count(dosename: string, begintime, endtime: DateTime) =
   echo "     From: ", begintime.format("yyyy-MM-dd HH:mm")
   echo "       To: ", endtime.format("yyyy-MM-dd HH:mm")
   echo "    Doses: ", count
-  echo " Duration: ", duration[Weeks] * 7 + duration[Days], " Days ", duration[Hours], " Hours ", duration[Minutes], " Minutes." 
+  echo " Duration: ", duration[Weeks] * 7 + duration[Days], " Days, ", duration[Hours], " Hours and ", duration[Minutes], " Minutes." 
   # echo "     Days: ", duration[Weeks], " Weeks ", duration[Days], " Days ", duration[Hours], " Hours ", duration[Minutes], " Minutes." 
   echo "Doses/Day: ", dosesperday
 
@@ -511,26 +481,22 @@ proc main() =
 
     help("main", QuitFailure)
 
-  if paramCount() >= 1 and paramStr(1) notin subCommands:
-
-    help("main", QuitFailure)
-
   if paramCount() == 1 and "-h" == paramStr(1):
 
     help("main", QuitSuccess)
+
+  if paramCount() >= 1 and paramStr(1) notin subCommands:
+
+    help("main", QuitFailure)
 
   case paramStr(1)
 
     of "select":
 
-      if paramCount() > 1 and paramStr(2) == "-h":
-
-        help("select")
-
       var
-        beginstr: Option[string]
-        endstr: Option[string]
-        searchstr: Option[string]
+        endtime: DateTime = now() + initDuration(days = 1)
+        begintime: DateTime = endtime - initDuration(weeks = 52)
+        search: Option[string]
 
       var p = initOptParser()
 
@@ -552,34 +518,40 @@ proc main() =
 
               of "b":
 
-                  beginstr = some(p.val)
+                  begintime = p.val.parse("yyyy-MM-dd HH:mm")
 
               of "e":
 
-                  endstr = some(p.val)
+                  endtime = p.val.parse("yyyy-MM-dd HH:mm")
+
+              of "h":
+
+                help("select")
 
               else:
 
-                quit("$1 select: Valid options are -h, -b and -e. The -h option must be the first.  Try dose select -h for more help." % appName)
+                quit("$1 select: Valid options are -b, -e and -h. Try dose select -h for more help." % appName)
 
           of cmdArgument:
 
             if p.key != "select":
 
-              searchstr = some(p.key)
+              begintime = endtime - initDuration(weeks = 5200)
 
-      select(beginstr, endstr, searchstr)
+              search = some(p.key)
+
+      select(begintime, endtime, search)
 
     of "insert":
 
       var
-        namestr: string
-        datetimestr: string
-        commentstr: string
+        dosename: string
+        datetime: DateTime = now()
+        comment: string = ""
 
-      if paramCount() == 2 and "-h" == paramStr(2):
+      # if paramCount() == 2 and "-h" == paramStr(2):
 
-        help("insert", QuitSuccess)
+      #   help("insert", QuitSuccess)
 
       var p = initOptParser()
 
@@ -601,13 +573,39 @@ proc main() =
 
               of "t":
 
-                if datetimestr.len == 0:
-                  datetimestr = p.val
+                try:
+
+                  if p.val.len == 5:
+
+                    let datestr = getDateStr() & " " & p.val
+
+                    datetime = datestr.parse("yyyy-MM-dd HH:mm")
+
+                  elif p.val.len == 16:
+  
+                    datetime = p.val.parse("yyyy-MM-dd HH:mm")
+
+                  else:
+
+                    echo("$1 insert: Invalid time format $2.\n" % [appName, p.val])
+
+                    help("insert")
+          
+                except TimeFormatParseError as e:
+
+                      quit(appName & " insert: " & e.msg)
+      
+                if datetime > now():
+
+                  quit(appName & " insert: " & "TIME can't be in the future.")
 
               of "c":
 
-                if commentstr.len == 0:
-                  commentstr = p.val
+                comment = p.val
+
+              of "h":
+
+                help("insert")
 
               else:
 
@@ -617,11 +615,13 @@ proc main() =
 
             if p.key != "insert":
 
-              namestr.add(" " & p.key)
+              dosename.add(" " & p.key)
 
-      namestr= namestr.strip()  
+      # echo datetime
 
-      insert(namestr, datetimestr, commentstr)
+      dosename= dosename.strip()  
+
+      insert(dosename, datetime, comment)
 
     of "update":
 
