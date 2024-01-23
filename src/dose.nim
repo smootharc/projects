@@ -46,7 +46,7 @@ proc help(subcommand: string, exitCode: int = QuitSuccess, ) =
   Print records from the dose table.  Optionally limit what records are printed by including only records that satisfy the search
   criteria specified in the SEARCH parameter and have dates falling between the BEGIN_TIME and END_TIME.
 
-  The SEARCH parameter may be blank or contain the operators *, (), AND, OR and NOT.  The valid time format is "yyyy-MM-dd HH:mm".
+  The SEARCH parameter may be blank or contain the operators *, (), AND, OR and NOT.  The valid time formats are "yyyy-MM-dd" or "yyyy-MM-dd HH:mm".
   If BEGIN_TIME is not given it defaults to 52 weeks ago.  If END_TIME is not given it defauts to the current time.
 
   Options:
@@ -133,32 +133,9 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
 
   var sqlstring: SqlQuery
 
-  # if beginstr.isSome():
-
-  #   try:
-
-  #     begintime = parse(beginstr.get, "yyyy-MM-dd HH:mm")
-
-  #   except TimeParseError as e:
-
-  #     quit("$1 select: $2" % [appName, e.msg])
-      
-  # if endstr.isSome():
-
-  #   try:
-
-  #     endtime = parse(endstr.get, "yyyy-MM-dd HH:mm")
-
-  #   except TimeParseError as e:
-
-  #     quit("$1 select: $2" % [appName, e.msg])
-
   if endtime < begintime:
 
-    # quit(appName & " select: The END_TIME must be later the BEGIN_TIME.", QuitFailure)
     quit("$1 select: The END_TIME must be later than the BEGIN_TIME." % appName)
-
-    # help("select")
 
   var db = opendb(readonly = true)
 
@@ -166,25 +143,16 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
 
   if search.isNone():
   
-    sqlstring = sql"select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose where date >= ? and date <= ? order by datetime"
+    sqlstring = sql"select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose where datetime >= ? and datetime <= ? order by datetime"
 
     rows = db.getAllRows(sqlstring, begintime.format("yyyy-MM-dd HH:mm"), endtime.format("yyyy-MM-dd HH:mm"))
-
-  # elif searchstr.get == "":
-  
-  #   sqlstring = sql"select id, date(date) as date, weight, food from weight where food = '' and date >= ? and date <= ? order by date"
-
-  #   rows = db.getAllRows(sqlstring, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
   
   elif search.isSome():
-
-    # if begin.isNone():
-
-    # begintime = endtime - initDuration(years= 52)
 
     try:    
 
       var searchstring = search.get
+
 
       if searchstring.startsWith("NOT "):
 
@@ -192,23 +160,22 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
 
         sqlstring = sql"""select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose
                 where id not in ( select docid from doseft where doseft match ? )
-                and date >= ? and date <= ? order by datetime"""
+                and datetime >= ? and datetime <= ? order by datetime"""
       else:
 
         sqlstring = sql"""select date(datetime) as date, strftime('%H:%M', datetime) as time, id, name, comment from dose
                 where id in ( select docid from doseft where doseft match ? )
-                and date >= ? and date <= ? order by datetime"""
-        # sqlstring = sql"""select id, date(date) as date, weight, food from weight
-        #         where id in ( select docid from weightft where weightft match ? )
-        #         and date >= ? and date <= ? order by date"""
+                and datetime >= ? and datetime <= ? order by datetime"""
 
       rows = db.getAllRows(sqlstring, searchstring, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
 
     except DbError as e:
 
      if "fts5" in e.msg:
-        
-       quit("$1 select: Encountered a search error. Use only the operators *, (), AND, OR and NOT in the search parameter.  The valid date format is yyyy-MM-dd." % appName)
+
+       e.msg.removePrefix("fts5: ") 
+
+       quit("$1 select: $2. Use only the operators *, (), AND, OR and NOT in the search string." % [appName, capitalizeAscii(e.msg)])
 
   if rows.len == 0:
 
@@ -217,6 +184,8 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
   var lastdate = ""
 
   var date = ""
+
+  var count = 0
   
   for row in rows:
 
@@ -230,9 +199,13 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
 
       date = row[0]
 
-      echo ""
-    
-    echo alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", row[3], "\t", row[4]
+      if count != 0:
+
+        echo ""
+
+    inc count  
+
+    echo alignLeft($count,7), alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", row[3], "\t", row[4]
 
 proc insert(name: string, datetime: DateTime, comment: string = "") =
 
@@ -257,8 +230,6 @@ proc insert(name: string, datetime: DateTime, comment: string = "") =
     if "FOREIGN" in getCurrentExceptionMsg():
 
       db.close()
-
-      # let msg = appName &  " insert: " & "'" & name & "'" & " is not a valid medication."
 
       quit("$1 insert: $2 is not a valid medication." % [appName, name])
 
@@ -372,69 +343,6 @@ proc delete(id: int) =
 
 proc count(dosename: string, begintime, endtime: DateTime) =
 
-  # var
-  #   endtimed: DateTime
-  #   starttimed: DateTime
-
-  # if starttime.isSome: 
-
-  #   if starttime.get.len == 10:
-
-  #     try:
-
-  #         starttimed = parse(starttime.get, "yyyy-MM-dd")
-
-  #     except TimeParseError as e:
-
-  #       quit("$1 count: $2." % [appName, e.msg])
-
-  #   elif starttime.get.len == 16:
-
-  #     try:
-
-  #         starttimed = parse(starttime.get, "yyyy-MM-dd HH:mm")
-
-  #     except TimeParseError as e:
-
-  #       quit("$1 count: $2." % [appName, e.msg])
-
-  #   else:
-
-  #     quit("$1 count: Invalid time format $2.  Type dose count -h for help." % [appName, starttime.get] )
-
-  # if endtime.isSome: 
-
-  #   if endtime.get.len == 10:
-
-  #     try:
-
-  #         endtimed = parse(endtime.get, "yyyy-MM-dd")
-
-  #     except TimeParseError as e:
-
-  #       quit("$1 count: $2." % [appName, e.msg])
-
-  #   elif endtime.get.len == 16:
-
-  #     try:
-
-  #         endtimed = parse(endtime.get, "yyyy-MM-dd HH:mm")
-
-  #     except TimeParseError as e:
-
-  #       quit("$1 count: $2." % [appName, e.msg])
-
-  #   else:
-
-  #     quit("$1 count: Invalid time format $2.  Type dose count -h for help." % [appName, endtime.get] )
-
-  # if endtime.isNone:
-
-  #   endtimed = now()
-
-  # if starttime.isNone:
-
-  #   starttimed = endtimed - initDuration(days = 30) 
   if endtime < begintime:
 
     echo("$1 count: The END_TIME must be later than the BEGIN_TIME.\n" % appName)
@@ -448,12 +356,9 @@ proc count(dosename: string, begintime, endtime: DateTime) =
 
   let endtimestr = endtime.format("yyyy-MM-dd HH:mm")
 
-  # echo dosename, " ", begintimestr, " ", endtimestr
-
   let db = opendb(true)
 
   let count = db.getValue(sql, dosename, begintimestr, endtimestr)
-  # let count = db.getValue(sql, dosename, begintime.format("yyyy-MM-dd HH:mm"), endtime.format("yyyy-MM-dd HH:mm"))
 
   if count == "0":
 
@@ -463,18 +368,33 @@ proc count(dosename: string, begintime, endtime: DateTime) =
 
   let dosesperday = formatFloat(count.parseFloat() / days.parseFloat(), ffDecimal, precision = 2)
 
-  let duration = toParts(endtime - begintime)
-
   echo "     Name: ", dosename
   echo "     From: ", begintime.format("yyyy-MM-dd HH:mm")
   echo "       To: ", endtime.format("yyyy-MM-dd HH:mm")
   echo "    Doses: ", count
-  echo " Duration: ", duration[Weeks] * 7 + duration[Days], " Days, ", duration[Hours], " Hours and ", duration[Minutes], " Minutes." 
-  # echo "     Days: ", duration[Weeks], " Weeks ", duration[Days], " Days ", duration[Hours], " Hours ", duration[Minutes], " Minutes." 
+  echo "     Days: ", days
   echo "Doses/Day: ", dosesperday
 
 proc main() =
 
+  proc parseDateTime(date: var string, subcommand: string): DateTime =
+
+    try:
+    
+      if date.len <= 5:
+
+        date = getDateStr() & " " & date
+
+      elif date.len == 10:
+
+        date = date & " 00:00"
+
+      result = date.parse("yyyy-MM-dd HH:mm")
+
+    except TimeParseError as e:
+
+      quit("$1 $2: $3" % [appName, subcommand, e.msg])
+  
   const subCommands = ["select", "insert", "update", "delete", "count"]
 
   if paramCount() == 0:
@@ -494,7 +414,7 @@ proc main() =
     of "select":
 
       var
-        endtime: DateTime = now() + initDuration(days = 1)
+        endtime: DateTime = now() 
         begintime: DateTime = endtime - initDuration(weeks = 52)
         search: Option[string]
 
@@ -518,11 +438,11 @@ proc main() =
 
               of "b":
 
-                  begintime = p.val.parse("yyyy-MM-dd HH:mm")
+                  begintime = p.val.parseDateTime("select")
 
               of "e":
 
-                  endtime = p.val.parse("yyyy-MM-dd HH:mm")
+                  endtime = p.val.parseDateTime("select")
 
               of "h":
 
@@ -538,7 +458,13 @@ proc main() =
 
               begintime = endtime - initDuration(weeks = 5200)
 
-              search = some(p.key)
+              if search.isNone():
+
+                search = some(p.key)
+
+              else:
+
+                search = some(search.get & " " & p.key)
 
       select(begintime, endtime, search)
 
@@ -548,10 +474,6 @@ proc main() =
         dosename: string
         datetime: DateTime = now()
         comment: string = ""
-
-      # if paramCount() == 2 and "-h" == paramStr(2):
-
-      #   help("insert", QuitSuccess)
 
       var p = initOptParser()
 
@@ -573,27 +495,7 @@ proc main() =
 
               of "t":
 
-                try:
-
-                  if p.val.len == 5:
-
-                    let datestr = getDateStr() & " " & p.val
-
-                    datetime = datestr.parse("yyyy-MM-dd HH:mm")
-
-                  elif p.val.len == 16:
-  
-                    datetime = p.val.parse("yyyy-MM-dd HH:mm")
-
-                  else:
-
-                    echo("$1 insert: Invalid time format $2.\n" % [appName, p.val])
-
-                    help("insert")
-          
-                except TimeFormatParseError as e:
-
-                      quit(appName & " insert: " & e.msg)
+                datetime = p.val.parseDateTime("insert")
       
                 if datetime > now():
 
@@ -617,15 +519,11 @@ proc main() =
 
               dosename.add(" " & p.key)
 
-      # echo datetime
-
       dosename= dosename.strip()  
 
       insert(dosename, datetime, comment)
 
     of "update":
-
-      # let p = commandLineParams()
 
       var id : Natural
 
@@ -672,7 +570,7 @@ proc main() =
     of "count":
 
       var dosename: string
-      var endtime: DateTime = now()# + initDuration(days = 1)
+      var endtime: DateTime = now() 
       var begintime: DateTime = endtime - initDuration(days= 30)
 
       var p = initOptParser()
@@ -694,47 +592,12 @@ proc main() =
             case p.key
 
               of "b":
-
-                var timestr: string
-
-                if p.val.len == 10:
-
-                  timestr = p.val & " 00:00"
-
-                else:
-
-                  timestr = p.val
-
-                try:
-          
-                  begintime = parse(timestr, "yyyy-MM-dd HH:mm")
-
-                except TimeParseError as e:
-
-                  # quit(appName & " select: " & e.msg)
-                  quit("$1 $2" % [appName, e.msg])
                     
+                begintime = p.val.parseDateTime("count")
 
               of "e":
 
-                var timestr: string
-
-                if p.val.len == 10:
-
-                  timestr = p.val & " 00:00"
-
-                else:
-
-                  timestr = p.val
-
-                try:
-          
-                  endtime = parse(timestr, "yyyy-MM-dd HH:mm")
-
-                except TimeParseError as e:
-
-                  # quit(appName & " select: " & e.msg)
-                  quit("$1 $2" % [appName, e.msg])
+                endtime = p.val.parseDateTime("count")
 
               of "h":
 
@@ -751,42 +614,7 @@ proc main() =
               dosename.add(" " & p.key)
 
       dosename= dosename.strip()
-      # echo "Begin Time: ", begintime, " End Time: ", endtime
 
       count(dosename, begintime, endtime)
-
-       # of 2:
-
-       #    if paramStr(2) == "-h":
-
-       #      help("count")
-
-       #    else:
-
-       #      let name = paramStr(1)
-
-       #      count(name, none(string), none(string))
-          
-       # of 3:
-
-       #    let name = paramStr(2)
-
-       #    let starttime = some(paramStr(3))
-
-       #    count(name, starttime, none(string))
-
-       # of 4:
-
-       #    let name = paramStr(2)
-
-       #    let starttime = some(paramStr(3))
-
-       #    let endtime = some(paramStr(4))
-
-       #    count(name, starttime, endtime)
-
-       # else:
-
-       #  help("count", QuitFailure)
 
 main()
