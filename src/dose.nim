@@ -497,9 +497,9 @@ proc main() =
 
                 datetime = p.val.parseDateTime("insert")
       
-                if datetime > now():
+                # if datetime > now():
 
-                  quit(appName & " insert: " & "TIME can't be in the future.")
+                #   quit(appName & " insert: " & "TIME can't be in the future.")
 
               of "c":
 
