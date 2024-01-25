@@ -5,10 +5,6 @@ import db_connector/db_sqlite
 import std/times
 import std/options
 import noise
-# import std/re
-# import std/terminal
-# import std/rdstdin
-# import std/sequtils
 
 let appName = extractFileName(getAppFileName())
 
