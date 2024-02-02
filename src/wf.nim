@@ -10,6 +10,32 @@ let appName = extractFileName(getAppFileName())
 
 const subCommands = ["select", "insert", "update", "delete"]
 
+proc opendb(readonly: bool = false): DbConn =
+
+  var 
+    appdir: string = getAppDir()
+    dbpath: string
+
+  if "projects" in appdir:
+
+    dbpath = parentDir(appdir) / ".local/share/medical.db" 
+
+  else:
+
+    dbpath = getHomeDir() / ".local/share/medical.db"
+    
+  let db = open(dbpath, "", "", "")
+
+  if readonly:
+
+    db.exec(sql"PRAGMA query_only = true")
+
+  else:
+
+    db.exec(sql"pragma foreign_keys = on")
+    
+  result = db
+
 proc help(subcommand: string, exitCode: int = QuitSuccess, ) =
 
   case subcommand
@@ -87,28 +113,6 @@ proc help(subcommand: string, exitCode: int = QuitSuccess, ) =
 
   quit(exitCode)
 
-proc opendb(readonly: bool = false): DbConn =
-
-  var 
-    appdir: string = getAppDir()
-    dbpath: string
-
-  if "projects" in appdir:
-
-    dbpath = parentDir(appdir) / ".local/share/medical.db" 
-
-  else:
-
-    dbpath = getHomeDir() / ".local/share/medical.db"
-    
-  let db = open(dbpath, "", "", "")
-
-  if readonly:
-
-    db.exec(sql"PRAGMA query_only = true")
-
-  result = db
-    
 proc select(beginstr, endstr, searchstr: Option[string]) =
 
   var
