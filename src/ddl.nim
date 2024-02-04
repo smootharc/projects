@@ -1,5 +1,6 @@
 import std/os
 import std/times
+import std/strutils
 
 const downloads = expandTilde("~/Downloads")
 
@@ -43,7 +44,7 @@ proc ddl*(minutes: Natural) =
 
       var age = getTime() - getCreationTime(f)
 
-      if age.inMinutes > minutes:
+      if age.inMinutes >= minutes:
 
         removeFile(f)
 
