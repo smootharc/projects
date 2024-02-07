@@ -167,7 +167,7 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
                 where id in ( select docid from doseft where doseft match ? )
                 and datetime >= ? and datetime <= ? order by datetime"""
 
-      rows = db.getAllRows(sqlstring, searchstring, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
+      rows = db.getAllRows(sqlstring, searchstring, begintime.format("yyyy-MM-dd HH:mm"), endtime.format("yyyy-MM-dd HH:mm"))
 
     except DbError as e:
 
@@ -205,7 +205,8 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
 
     inc count  
 
-    echo alignLeft($count,7), alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", row[3], "\t", row[4]
+    # echo alignLeft($count,7), alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", row[3], "\t", row[4]
+    echo alignLeft($count,7), alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", alignleft(row[3],25), row[4]
 
 proc insert(name: string, datetime: DateTime, comment: string = "") =
 
