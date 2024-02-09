@@ -205,7 +205,7 @@ proc update(id: Natural) =
 
   except AssertionDefect:
 
-    echo appName, " update: No record with that ID was found. Are you sure it exists?" 
+    quit("$1 update: No record with the ID '$2' was found. Are you sure it exists?" % [appName, $id]) 
 
   var noise = Noise.init()
 
@@ -443,25 +443,19 @@ proc main() =
 
     of "update":
 
-      let p = commandLineParams()
-
-      var id : Natural
-
-      if paramCount() > 2:
-
-        help("update", QuitFailure)
-
-      if paramCount() == 2 and p[1] == "-h":
+      if "-h" in commandLineParams():
 
         help("update")
 
+      var id : Natural
+
       try:
 
-        id = parseInt(p[1])
+        id = parseInt(paramStr(2))
 
       except:
-
-        help("update", QuitFailure)
+        
+        quit("$1 insert: ID '$2' must be an integer." % [appName, paramStr(2)])
 
       update(id)
 
