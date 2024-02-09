@@ -129,7 +129,8 @@ proc select(begintime, endtime: DateTime, searchstr: Option[string]) =
   
     sqlstring = sql"select id, date(date) as date, weight, food from weight where food = '' and date >= ? and date <= ? order by date"
 
-    rows = db.getAllRows(sqlstring, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
+    rows = db.getAllRows(sqlstring, begintime, endtime)
+    # rows = db.getAllRows(sqlstring, begintime.format("yyyy-MM-dd"), endtime.format("yyyy-MM-dd"))
   
   elif searchstr.isSome():
 
@@ -410,7 +411,9 @@ proc main() =
 
                 try:
 
-                  discard p.val.parse("yyyy-MM-dd")
+                  if p.val.parse("yyyy-MM-dd") > now():
+
+                    quit("$1 insert: DATE '$2' must be in the past." % [appName, p.val])
 
                 except ValueError as e:
 
