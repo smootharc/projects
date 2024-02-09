@@ -362,7 +362,7 @@ proc main() =
 
             if p.key != "select":
 
-              # begintime = endtime - initDuration(weeks = 5200)
+              begintime = endtime - initDuration(weeks = 5200)
 
               if search.isNone():
 
@@ -461,25 +461,19 @@ proc main() =
 
     of "delete":
 
-      let p = commandLineParams()
-
-      var id: Natural
-
-      if paramCount() > 2:
-
-        help("delete", QuitFailure)
-
-      if paramCount() == 2 and p[1] == "-h":
+      if "-h" in commandLineParams():
 
         help("delete")
 
+      var id: Natural
+
       try:
 
-        id = parseInt(p[1])
+        id = parseInt(paramStr(2))
 
       except:
 
-        help("delete", QuitFailure)
+        quit("$1 delete: ID '$2' must be an integer." % [appName, paramStr(2)])
 
       delete(id)
 
