@@ -8,8 +8,6 @@ import noise
 
 let appName = extractFileName(getAppFileName())
 
-const subCommands = ["select", "insert", "update", "delete"]
-
 proc opendb(readonly: bool = false): DbConn =
 
   var 
@@ -113,36 +111,9 @@ proc help(subcommand: string, exitCode: int = QuitSuccess, ) =
 
   quit(exitCode)
 
-proc select(beginstr, endstr, searchstr: Option[string]) =
+proc select(begintime, endtime: DateTime, searchstr: Option[string]) =
 
-  var
-    endtime: DateTime = now() + initDuration(days = 1)
-    begintime: DateTime = endtime - initDuration(weeks = 52)
-    sqlstring: SqlQuery
-
-  if beginstr.isSome():
-
-    try:
-
-      begintime = parse(beginstr.get, "yyyy-MM-dd")
-
-    except TimeParseError as e:
-
-      quit(appName & ": " & e.msg)
-      
-  if endstr.isSome():
-
-    try:
-
-      endtime = parse(endstr.get, "yyyy-MM-dd")
-
-    except TimeParseError as e:
-
-      quit(appName & ": " & e.msg)
-
-  if endtime < begintime:
-
-    quit("End Date must be later the begin date.", QuitFailure)
+  var sqlstring: SqlQuery
 
   var db = opendb(readonly = true)
 
@@ -352,33 +323,20 @@ proc delete(id: int) =
 
 proc main() =
 
-  var parameters = commandLineParams()
-
   if paramCount() == 0:
 
-    help("main", QuitFailure)
+    help("main")
 
-  if paramCount() == 1 and "-h" == parameters[0]:
-
-    help("main", QuitSuccess)
-
-  if paramCount() > 1 and parameters[0] notin subCommands:
-
-      help("main", QuitFailure)
-
-  case parameters[0]
+  case paramStr(1)
 
     of "select":
 
-      if paramCount() > 1 and parameters[1] == "-h":
-
-        help("select")
-
-      var subCommandParameters: array[3, Option[string]]
+      var
+        endtime: DateTime = now() # + initDuration(days = 1)
+        begintime: DateTime = endtime - initDuration(weeks = 52)
+        search: Option[string]
 
       var p = initOptParser()
-
-      subCommandParameters[2] = none(string)
 
       while true:
 
@@ -398,19 +356,47 @@ proc main() =
 
               of "b":
 
-                  subCommandParameters[0] = some(p.val)
+                try:
+
+                  begintime = parse(p.val, "yyyy-MM-dd")
+
+                except TimeParseError as e:
+
+                  quit(appName & ": " & e.msg)
 
               of "e":
 
-                  subCommandParameters[1] = some(p.val)
+                try:
+
+                  endtime = parse(p.val, "yyyy-MM-dd")
+
+                except TimeParseError as e:
+
+                  quit(appName & ": " & e.msg)
+
+              of "h":
+
+                help("select")
 
           of cmdArgument:
 
             if p.key != "select":
 
-              subCommandParameters[2] = some(p.key)
+              # begintime = endtime - initDuration(weeks = 5200)
 
-      select(subCommandParameters[0], subCommandParameters[1], subCommandParameters[2])
+              if search.isNone():
+
+                search = some(p.key)
+
+              else:
+
+                search = some(search.get & " " & p.key)
+      
+      if endtime < begintime:
+
+        quit("$1 select: The END_DATE must be later than the BEGIN_DATE." % appName, QuitFailure)
+
+      select(begintime, endtime, search)
 
     of "insert":
 
@@ -523,7 +509,12 @@ proc main() =
 
       delete(id)
 
+    else:
+
+      echo "$1 Unknown command: $2" % [appName, paramStr(1)], "\n"
+
+      help("main", QuitFailure)
+
 when isMainModule:
-  # when defined(release):
-    # echo "Release"
+  
   main()
