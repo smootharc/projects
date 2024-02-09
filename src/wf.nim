@@ -162,28 +162,7 @@ proc select(begintime, endtime: DateTime, searchstr: Option[string]) =
 
     echo alignleft(row[0],6), alignleft(row[1], 11),  align(row[2], 7), "  ", row[3]
   
-proc insert(date: Option[DateTime], weight: Option[float], food: string = "") =
-
-  var
-    datestr: string
-    weightstr: string
-    id: string
-
-  if date.isSome:
-
-    datestr = date.get.format("yyyy-MM-dd")
-
-  else:
-
-    datestr = now().format("yyyy-MM-dd")
-
-  if weight.isSome:
-
-    weightstr = weight.get.formatFloat(ffDecimal, 1)
-
-  else:
-
-    weightstr = "0"
+proc insert(date: string, weight: float, food: string = "") =
 
   var db = opendb()
 
@@ -191,19 +170,19 @@ proc insert(date: Option[DateTime], weight: Option[float], food: string = "") =
 
   try:
 
-    db.exec(sql, datestr, weightstr, food)
+    db.exec(sql, date, weight, food)
 
   except DbError as e:
 
     if e.msg.contains("UNIQUE"):
 
-      quit(appName & ": There is already an entry for that date: " & datestr)
+      quit(appName & ": There is already an entry for that date: " & date)
   
   finally:
 
     sql = sql"select last_insert_rowid()"
 
-    id = db.getValue(sql)
+    let id = db.getValue(sql)
 
     echo "Successfully inserted a row with the id " & id    
 
@@ -331,6 +310,10 @@ proc main() =
 
     of "select":
 
+      if "-h" in commandLineParams():
+
+        help("select")
+
       var
         endtime: DateTime = now() # + initDuration(days = 1)
         begintime: DateTime = endtime - initDuration(weeks = 52)
@@ -374,10 +357,6 @@ proc main() =
 
                   quit(appName & ": " & e.msg)
 
-              of "h":
-
-                help("select")
-
           of cmdArgument:
 
             if p.key != "select":
@@ -400,9 +379,13 @@ proc main() =
 
     of "insert":
 
+      if "-h" in commandLineParams():
+
+        help("insert")
+
       var
-        date: Option[DateTime]
-        weight: Option[float]
+        date: string = getDateStr()
+        weight: float
         food: string
 
       var p = initOptParser()
@@ -423,33 +406,27 @@ proc main() =
 
             case p.key
 
-              of "h":
-
-                help("insert")
-
               of "d":
 
                 try:
 
-                  date = some(p.val.parse("yyyy-MM-dd"))
+                  discard p.val.parse("yyyy-MM-dd")
 
-                except ValueError:
+                except ValueError as e:
 
-                  quit("Invalid date. Dates must be in yyyy-MM-dd format.")
+                  quit("$1 insert: Invalid date. $2." % [appName, e.msg])
+
+                date = p.val
 
               of "w":
 
                 try:
 
-                  weight = some(p.val.parseFloat())
+                  weight = p.val.parseFloat()
 
                 except ValueError:
 
-                  quit("Invalid weight. Weights must be floating point numbers.")
-
-              else:
-
-                help("insert")
+                  quit("$1 insert: Invalid weight '$2'.  WEIGHT must be a floating point number." % [appName, p.val])
             
           of cmdArgument:
 
