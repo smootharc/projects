@@ -8,20 +8,36 @@ import noise
 
 let appName = extractFileName(getAppFileName())
 
+var release: bool
+
+when defined(release):
+
+  release = true
+
+else:
+
+  release = false
+
 proc opendb(readonly: bool = false): DbConn =
 
   var 
     appdir: string = getAppDir()
     dbpath: string
 
-  if "projects" in appdir:
+  proc isOnPath(): bool =
 
-    dbpath = parentDir(appdir) / ".local/share/medical.db" 
+      let path = split(getEnv("PATH"),":")
+
+      appdir in path
+
+  if release and isOnPath():# and isOnPath():
+    
+    dbpath = getHomeDir() / ".local/share/medical.db"
 
   else:
 
-    dbpath = getHomeDir() / ".local/share/medical.db"
-    
+    dbpath = parentDir(appdir) / ".local/share/medical.db" 
+   
   let db = open(dbpath, "", "", "")
 
   if readonly:
@@ -482,7 +498,6 @@ proc main() =
       echo "$1 Unknown command: $2" % [appName, paramStr(1)], "\n"
 
       help("main", QuitFailure)
-
-when isMainModule:
   
-  main()
+main()
+  
