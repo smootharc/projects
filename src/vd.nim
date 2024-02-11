@@ -1,5 +1,4 @@
 import std/os
-import std/strutils  # Why import this if std/os imports it?
 import std/parseopt
 import std/mimetypes
 import std/times
@@ -7,7 +6,7 @@ import std/tempfiles
 import std/algorithm
 import std/re
 import ddl
-
+import std/strutils  # Why import this if std/os imports it?
 #import std/sequtils
 #import std/dirs
 #import std/files
@@ -20,6 +19,7 @@ type file = tuple
 var
   images: seq[file]
   videos: seq[file]
+  m = newMimetypes()
 
 proc help(errorlevel: int = QuitSuccess) =
   echo "Usage: ", extractFileName(getAppFileName()), " [OPTION]... [DIRECTORY] [default: ~/Downloads]\n"
@@ -34,67 +34,104 @@ proc help(errorlevel: int = QuitSuccess) =
   -f[=:]TEXT           Display only files containing the regex TEXT in the absolute pathname of the file.
                        If any of TEXT contain capital letters the search will be case sensitive.
   -m[=:]INTEGER        Delete files in the ~/Downloads folder older than INTEGER minutes.
-  -s[=:][n,o,a,ar]     Sort by time, newest first or time, oldest first. Name alphabetically or name alphabetically reversed. [default: n, newest first]
+  -s[=:][n,o,a,r]      Sort by time, newest first or time, oldest first. Name alphabetically or name alphabetically reversed. [default: n, newest first]
   -h                   Show this message and exit.
   
   An equal sign or a colon separates the option from the option value.
   """
   quit(errorlevel)
 
-proc getimagesandvideos(dir: string, substring: string = ".*") = #: (seq[file], seq[file]) =
- 
-  var m = newMimetypes()
-  
-  var searchfor: Regex
+proc processFile(filename: string, substring: string = ".*") =
 
+  # echo substring
   var file: file
 
-  for f in walkDirRec(dir):
+  # for f in walkDirRec(dir):
+  var searchfor: Regex
     
-      if "_unpack" in f:
-        continue
+  # if "_unpack" in file:
+  #   continue
+    
+  if substring.contains({'A'..'Z'}):
+    searchfor = re(substring)
+  else:
+    searchfor = re(substring, {reIgnoreCase})
+
+  if filename.contains(searchfor):
+    # return
+      
+    var ext = splitFile(filename).ext
+  
+    var mimetype = m.getMimetype(ext)
+
+    file.name = filename
+    try:
+      file.time = filename.getCreationTime()
+    except OSError:
+      discard
+    # file.time = getLastAccessTime(f)
+    # file.time = getFileInfo(f).lastWriteTime
+
+    if "image" in mimetype:
+      images.add(file)
+    elif "video" in mimetype:
+      videos.add(file)
+    elif expandTilde("~/Downloads") in filename:
+      filename.removeFile()
+  
+
+proc getimagesandvideos(dir: string, substring: string = ".*") = #: (seq[file], seq[file]) =
+ 
+  # var m = newMimetypes()
+  
+  # var searchfor: Regex
+
+  # var file: file
+
+  for f in walkDirRec(dir):
+
+    processFile(f, substring)
+    
+  #     if "_unpack" in f:
+  #       continue
         
-      if substring.contains({'A'..'Z'}):
-        searchfor = re(substring)
-      else:
-        searchfor = re(substring, {reIgnoreCase})
+  #     if substring.contains({'A'..'Z'}):
+  #       searchfor = re(substring)
+  #     else:
+  #       searchfor = re(substring, {reIgnoreCase})
 
-      if not f.contains(searchfor):
-        continue
+  #     if not f.contains(searchfor):
+  #       continue
           
-      var ext = splitFile(f).ext
+  #     var ext = splitFile(f).ext
       
-#      echo ext
-      
-      var mimetype = m.getMimetype(ext)
+  #     var mimetype = m.getMimetype(ext)
 
-      file.name = f
-      try:
-        file.time = f.getCreationTime()
-      except OSError:
-        continue
-      # file.time = getLastAccessTime(f)
-      # file.time = getFileInfo(f).lastWriteTime
+  #     file.name = f
+  #     try:
+  #       file.time = f.getCreationTime()
+  #     except OSError:
+  #       continue
+  #     # file.time = getLastAccessTime(f)
+  #     # file.time = getFileInfo(f).lastWriteTime
 
-      if "image" in mimetype:
-        images.add(file)
-      elif "video" in mimetype:
-        videos.add(file)
-      elif dir == expandTilde("~/Downloads"):
-        f.removeFile()
+  #     if "image" in mimetype:
+  #       images.add(file)
+  #     elif "video" in mimetype:
+  #       videos.add(file)
+  #     elif dir == expandTilde("~/Downloads"):
+  #       f.removeFile()
             
   # result = (images, videos)
  
 proc main() =
 
   var
-    dir: string = expandTilde("~/Downloads")
     sort: string = "t"
     minutes: Natural = high(Natural)
     substr: string
-    # imagesandvideos: (seq[file], seq[file])
-    args: seq[string] = commandLineParams()
-    p = initOptParser(args)
+    args: seq[string] #= commandLineParams()
+    p = initOptParser()
     
   if "-h" in args:
     help()
@@ -108,19 +145,21 @@ proc main() =
     of cmdShortOption:
       case p.key
       of "s":
-        if p.val notin ["o", "n", "a", "ar"]:
-          quit("Invalid value for -s option. Valid options are n, o, a and ar.")
+        if p.val notin ["n", "o", "a", "r"]:
+          quit("Invalid value for -s option. Valid options are n, o, a and r. [Default = n]")
         case p.val
-        of "n":
-          sort = "n"
-        of "tr":
-          sort = "o"
-        of "a":
-          sort = "a"
-        of "ar":
-          sort = "ar"
+        of "n","o","a","r":
+          sort = p.val
+        # of "n":
+        #   sort = "n"
+        # of "o":
+        #   sort = "o"
+        # of "a":
+        #   sort = "a"
+        # of "ar":
+        #   sort = "r"
         else:
-          echo "Valid options for option -s are td, ta, nd and na."
+          echo "Valid options for option -s are n, o, a and r."
       of "m":
         try:
           minutes = parseint(p.val)
@@ -131,17 +170,34 @@ proc main() =
           quit("Option -f requires an argument.")
         else:
           substr = p.val
+
+      of "h":
+        help()
       else:
         #let msg = "Invalid option -"& $p.key
         quit("Invalid option -" & $p.key & ".")
     of cmdArgument:
-      dir = p.key.absolutePath()
+
+      args.add(p.key)
+
+  for a in args:
+
+    if a.fileExists():
+
+      processFile(a, substr)
+
+    elif a.dirExists():
+
+      for f in walkDirRec(a):
+
+        processFile(f, substr)
+      # dir = p.key.absolutePath()
       
-  if dirExists(dir):
-    # imagesandvideos = getimagesandvideos(dir, substr)
-    getimagesandvideos(dir, substr)
-  else:
-    quit(extractFileName(getAppFilename()) & ": The directory " & dir & " does does not exist!")
+  # if dirExists(dir):
+  #   # imagesandvideos = getimagesandvideos(dir, substr)
+  #   getimagesandvideos(dir, substr)
+  # else:
+  #   quit(extractFileName(getAppFilename()) & ": The directory " & dir & " does does not exist!")
 
   proc sorttimeasc(x, y: file): int =
     cmp(x.time, y.time)
@@ -169,19 +225,8 @@ proc main() =
       images.sort(sortnamedes)
       videos.sort(sortnamedes)
     else:
+
       discard
-#[
-  images = imagesandvideos[0]
-  for f in images:
-    echo f
-
-  videos = imagesandvideos[1]
-  for f in videos:
-    echo f
-  
-  quit()
-]#
-
   if images.len > 0:
     let (tfile, path) = createTempFile("images", ".tmp")
     defer: path.removeFile()
