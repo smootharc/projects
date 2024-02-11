@@ -155,16 +155,16 @@ proc main() =
     cmp(y.name.toLowerAscii(), x.name.toLowerAscii())
   
   case sort
-    of "t":
+    of "n":
       images.sort(sorttimedes)
       videos.sort(sorttimedes)
-    of "tr":
+    of "o":
       images.sort(sorttimeasc)
       videos.sort(sorttimeasc)
     of "a":
       images.sort(sortnameasc)
       videos.sort(sortnameasc)
-    of "ar":
+    of "r":
       images.sort(sortnamedes)
       videos.sort(sortnamedes)
     else:
