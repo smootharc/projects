@@ -43,10 +43,8 @@ proc help(errorlevel: int = QuitSuccess) =
 
 proc processFile(filename: string, substring: string = ".*") =
 
-  # echo substring
   var file: file
 
-  # for f in walkDirRec(dir):
   var searchfor: Regex
     
   # if "_unpack" in file:
@@ -78,52 +76,7 @@ proc processFile(filename: string, substring: string = ".*") =
       videos.add(file)
     elif expandTilde("~/Downloads") in filename:
       filename.removeFile()
-  
 
-proc getimagesandvideos(dir: string, substring: string = ".*") = #: (seq[file], seq[file]) =
- 
-  # var m = newMimetypes()
-  
-  # var searchfor: Regex
-
-  # var file: file
-
-  for f in walkDirRec(dir):
-
-    processFile(f, substring)
-    
-  #     if "_unpack" in f:
-  #       continue
-        
-  #     if substring.contains({'A'..'Z'}):
-  #       searchfor = re(substring)
-  #     else:
-  #       searchfor = re(substring, {reIgnoreCase})
-
-  #     if not f.contains(searchfor):
-  #       continue
-          
-  #     var ext = splitFile(f).ext
-      
-  #     var mimetype = m.getMimetype(ext)
-
-  #     file.name = f
-  #     try:
-  #       file.time = f.getCreationTime()
-  #     except OSError:
-  #       continue
-  #     # file.time = getLastAccessTime(f)
-  #     # file.time = getFileInfo(f).lastWriteTime
-
-  #     if "image" in mimetype:
-  #       images.add(file)
-  #     elif "video" in mimetype:
-  #       videos.add(file)
-  #     elif dir == expandTilde("~/Downloads"):
-  #       f.removeFile()
-            
-  # result = (images, videos)
- 
 proc main() =
 
   var
@@ -150,14 +103,6 @@ proc main() =
         case p.val
         of "n","o","a","r":
           sort = p.val
-        # of "n":
-        #   sort = "n"
-        # of "o":
-        #   sort = "o"
-        # of "a":
-        #   sort = "a"
-        # of "ar":
-        #   sort = "r"
         else:
           echo "Valid options for option -s are n, o, a and r."
       of "m":
@@ -174,12 +119,17 @@ proc main() =
       of "h":
         help()
       else:
-        #let msg = "Invalid option -"& $p.key
+
         quit("Invalid option -" & $p.key & ".")
+
     of cmdArgument:
 
       args.add(p.key)
 
+  if args.len == 0:
+
+    args.add(expandTilde("~/Downloads"))
+      
   for a in args:
 
     if a.fileExists():
@@ -191,13 +141,6 @@ proc main() =
       for f in walkDirRec(a):
 
         processFile(f, substr)
-      # dir = p.key.absolutePath()
-      
-  # if dirExists(dir):
-  #   # imagesandvideos = getimagesandvideos(dir, substr)
-  #   getimagesandvideos(dir, substr)
-  # else:
-  #   quit(extractFileName(getAppFilename()) & ": The directory " & dir & " does does not exist!")
 
   proc sorttimeasc(x, y: file): int =
     cmp(x.time, y.time)
