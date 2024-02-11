@@ -4,9 +4,9 @@ import std/mimetypes
 import std/times
 import std/tempfiles
 import std/algorithm
+import std/strutils # Why import this if std/os imports it?
 import std/re
 import ddl
-import std/strutils  # Why import this if std/os imports it?
 #import std/sequtils
 #import std/dirs
 #import std/files
@@ -47,40 +47,48 @@ proc processFile(filename: string, substring: string = ".*") =
 
   var searchfor: Regex
     
-  # if "_unpack" in file:
-  #   continue
-    
   if substring.contains({'A'..'Z'}):
+
     searchfor = re(substring)
+
   else:
+
     searchfor = re(substring, {reIgnoreCase})
 
-  if filename.contains(searchfor):
-    # return
+  if "_unpack" notin filename:
+
+    if filename.contains(searchfor):
       
-    var ext = splitFile(filename).ext
+      var ext = splitFile(filename).ext
   
-    var mimetype = m.getMimetype(ext)
+      var mimetype = m.getMimetype(ext)
 
-    file.name = filename
-    try:
-      file.time = filename.getCreationTime()
-    except OSError:
-      discard
-    # file.time = getLastAccessTime(f)
-    # file.time = getFileInfo(f).lastWriteTime
+      file.name = filename
 
-    if "image" in mimetype:
-      images.add(file)
-    elif "video" in mimetype:
-      videos.add(file)
-    elif expandTilde("~/Downloads") in filename:
-      filename.removeFile()
+      try:
+
+        file.time = filename.getCreationTime()
+
+      except OSError:
+
+        discard
+    
+      if "image" in mimetype:
+
+        images.add(file)
+
+      elif "video" in mimetype:
+
+        videos.add(file)
+
+      elif expandTilde("~/Downloads") in filename:
+
+        filename.removeFile()
 
 proc main() =
 
   var
-    sort: string = "t"
+    sort: string = "n"
     minutes: Natural = high(Natural)
     substr: string
     args: seq[string] #= commandLineParams()
