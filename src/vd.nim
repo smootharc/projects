@@ -7,10 +7,19 @@ import std/algorithm
 import std/strutils # Why import this if std/os imports it?
 import std/re
 import ddl
+# import std/parsecfg
 #import std/sequtils
 #import std/dirs
 #import std/files
 #import magic
+
+when defined(release):
+
+  let release = true
+
+else:
+
+  let release = false
 
 type file = tuple
   name: string
@@ -20,6 +29,15 @@ var
   images: seq[file]
   videos: seq[file]
   m = newMimetypes()
+  appdir = getAppDir()
+  parentdir = parentDir(getAppDir())
+  deletecontaining: seq[string]
+
+proc isOnPath(): bool =
+
+    let path = split(getEnv("PATH"),":")
+
+    appdir in path
 
 proc help(errorlevel: int = QuitSuccess) =
   echo "Usage: ", extractFileName(getAppFileName()), " [OPTION]... [DIRECTORY] [default: ~/Downloads]\n"
@@ -41,6 +59,23 @@ proc help(errorlevel: int = QuitSuccess) =
   """
   quit(errorlevel)
 
+proc openConfig() =
+
+  try:
+
+    if release and isOnPath():
+
+      deletecontaining = readFile(getHomeDir() / ".config/vd/vd.cfg").split("\n")
+
+    else:
+
+      deletecontaining = readFile(parentdir / ".config/vd/vd.cfg").split("\n")
+
+  except IOerror:
+
+    discard
+
+# proc processFile(filename: string, substring: string = ".*") =
 proc processFile(filename: string, substring: string = ".*") =
 
   var file: file
@@ -57,7 +92,13 @@ proc processFile(filename: string, substring: string = ".*") =
 
   if "_unpack" notin filename:
 
-    if filename.contains(searchfor):
+    for s in deletecontaining:
+
+      if expandTilde("~/Downloads") in filename and s in filename and s.len > 0:
+
+        filename.removeFile()
+
+    if substring.len > 0 and filename.contains(substring):
       
       var ext = splitFile(filename).ext
   
@@ -84,124 +125,120 @@ proc processFile(filename: string, substring: string = ".*") =
       elif expandTilde("~/Downloads") in filename:
 
         filename.removeFile()
-
-proc main() =
-
-  var
-    sort: string = "n"
-    minutes: Natural = high(Natural)
-    substr: string
-    args: seq[string] #= commandLineParams()
-    p = initOptParser()
-    
-  if "-h" in args:
-    help()
-    
-  while true:
-    p.next()
-    case p.kind
-    of cmdEnd: break
-    of cmdLongOption:
-      quit("Long options are not supported.")
-    of cmdShortOption:
-      case p.key
-      of "s":
-        if p.val notin ["n", "o", "a", "r"]:
-          quit("Invalid value for -s option. Valid options are n, o, a and r. [Default = n]")
-        case p.val
-        of "n","o","a","r":
-          sort = p.val
-        else:
-          echo "Valid options for option -s are n, o, a and r."
-      of "m":
-        try:
-          minutes = parseint(p.val)
-        except:
-          quit("Option -m requires an integer argument greater than or equal to zero.")
-      of "f":
-        if p.val == "":
-          quit("Option -f requires an argument.")
-        else:
-          substr = p.val
-
-      of "h":
-        help()
+       
+var
+  sort: string = "n"
+  minutes: Natural = high(Natural)
+  substr: string
+  args: seq[string] #= commandLineParams()
+  p = initOptParser()
+  
+if "-h" in args:
+  help()
+  
+while true:
+  p.next()
+  case p.kind
+  of cmdEnd: break
+  of cmdLongOption:
+    quit("Long options are not supported.")
+  of cmdShortOption:
+    case p.key
+    of "s":
+      if p.val notin ["n", "o", "a", "r"]:
+        quit("Invalid value for -s option. Valid options are n, o, a and r. [Default = n]")
+      case p.val
+      of "n","o","a","r":
+        sort = p.val
       else:
+        echo "Valid options for option -s are n, o, a and r."
+    of "m":
+      try:
+        minutes = parseint(p.val)
+      except:
+        quit("Option -m requires an integer argument greater than or equal to zero.")
+    of "f":
+      if p.val == "":
+        quit("Option -f requires an argument.")
+      else:
+        substr = p.val
 
-        quit("Invalid option -" & $p.key & ".")
-
-    of cmdArgument:
-
-      args.add(p.key)
-
-  if args.len == 0:
-
-    args.add(expandTilde("~/Downloads"))
-      
-  for a in args:
-
-    if a.fileExists():
-
-      processFile(a, substr)
-
-    elif a.dirExists():
-
-      for f in walkDirRec(a):
-
-        processFile(f, substr)
-
-  proc sorttimeasc(x, y: file): int =
-    cmp(x.time, y.time)
-
-  proc sorttimedes(x, y: file): int =
-    cmp(y.time, x.time)
-  
-  proc sortnameasc(x, y: file ): int =
-    cmp(x.name.toLowerAscii(), y.name.toLowerAscii())
-    
-  proc sortnamedes(x, y: file ): int =
-    cmp(y.name.toLowerAscii(), x.name.toLowerAscii())
-  
-  case sort
-    of "n":
-      images.sort(sorttimedes)
-      videos.sort(sorttimedes)
-    of "o":
-      images.sort(sorttimeasc)
-      videos.sort(sorttimeasc)
-    of "a":
-      images.sort(sortnameasc)
-      videos.sort(sortnameasc)
-    of "r":
-      images.sort(sortnamedes)
-      videos.sort(sortnamedes)
+    of "h":
+      help()
     else:
 
-      discard
-  if images.len > 0:
-    let (tfile, path) = createTempFile("images", ".tmp")
-    defer: path.removeFile()
-    for f in images:
-      tfile.write f.name, "\n"
-    tfile.setFilePos 0
-    discard execShellCmd("feh -dqFf " & path)
-    # path.removeFile()
-  else:
-    echo "No images found!"
-    
-  if videos.len > 0:
-    let (tfile, path) = createTempFile("videos", ".tmp")
-    defer: path.removeFile()
-    for f in videos:
-      tfile.write f.name, "\n"
-    tfile.setFilePos 0
-    discard execShellCmd("mpv --really-quiet --playlist=" & path)
-    # path.removeFile()
-  else:
-    echo "No videos found!"
-  
-  # if dir == expandTilde("~/Downloads"):
-    # discard execShellCmd("ddl " & $minutes)
-  ddl(minutes)
+      quit("Invalid option -" & $p.key & ".")
 
-main()
+  of cmdArgument:
+
+    args.add(p.key)
+
+if args.len == 0:
+
+  args.add(expandTilde("~/Downloads"))
+
+openConfig()
+    
+for a in args:
+
+  if a.fileExists():
+
+    processFile(a, substr)
+
+  elif a.dirExists():
+
+    for f in walkDirRec(a):
+
+      processFile(f, substr)
+
+proc sorttimeasc(x, y: file): int =
+  cmp(x.time, y.time)
+
+proc sorttimedes(x, y: file): int =
+  cmp(y.time, x.time)
+
+proc sortnameasc(x, y: file ): int =
+  cmp(x.name.toLowerAscii(), y.name.toLowerAscii())
+  
+proc sortnamedes(x, y: file ): int =
+  cmp(y.name.toLowerAscii(), x.name.toLowerAscii())
+
+case sort
+  of "n":
+    images.sort(sorttimedes)
+    videos.sort(sorttimedes)
+  of "o":
+    images.sort(sorttimeasc)
+    videos.sort(sorttimeasc)
+  of "a":
+    images.sort(sortnameasc)
+    videos.sort(sortnameasc)
+  of "r":
+    images.sort(sortnamedes)
+    videos.sort(sortnamedes)
+  else:
+
+    discard
+if images.len > 0:
+  let (tfile, path) = createTempFile("images", ".tmp")
+  defer: path.removeFile()
+  for f in images:
+    tfile.write f.name, "\n"
+  tfile.setFilePos 0
+  discard execShellCmd("feh -dqFf " & path & "&> /dev/null")
+  # path.removeFile()
+else:
+  echo "No images found!"
+  
+if videos.len > 0:
+  let (tfile, path) = createTempFile("videos", ".tmp")
+  defer: path.removeFile()
+  for f in videos:
+    tfile.write f.name, "\n"
+  tfile.setFilePos 0
+  discard execShellCmd("mpv --really-quiet --playlist=" & path)
+  # path.removeFile()
+else:
+  echo "No videos found!"
+
+ddl(minutes)
