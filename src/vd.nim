@@ -98,7 +98,7 @@ proc processFile(filename: string, substring: string = ".*") =
 
         filename.removeFile()
 
-    if substring.len > 0 and filename.contains(substring):
+    if filename.contains(searchfor):
       
       var ext = splitFile(filename).ext
   
