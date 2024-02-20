@@ -8,19 +8,32 @@ import noise
 
 let appName = extractFileName(getAppFileName())
 
+when defined(release):
+
+  let release = true
+
+else:
+
+  let release = false
+
 proc opendb(readonly: bool = false): DbConn =
 
   var 
-    appdir: string = getAppDir()
     dbpath: string
 
-  if "projects" in appdir:
+  proc isOnPath(): bool =
 
-    dbpath = parentDir(appdir) / ".local/share/medical.db" 
+      let path = split(getEnv("PATH"),":")
+
+      getAppDir() in path
+
+  if release and isOnPath():# and isOnPath():
+    
+    dbpath = getHomeDir() / ".local/share/medical.db"
 
   else:
 
-    dbpath = getHomeDir() / ".local/share/medical.db"
+    dbpath = parentDir(getAppDir()) / ".local/share/medical.db" 
     
   let db = open(dbpath, "", "", "")
 
