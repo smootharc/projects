@@ -1,6 +1,7 @@
 import std/os
 import std/times
 import std/strutils
+export strutils
 
 const downloads = expandTilde("~/Downloads")
 
