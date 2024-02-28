@@ -1,51 +1,57 @@
 import std/os
+import strutils
 import std/parseopt
 import std/mimetypes
 import std/times
 import std/tempfiles
 import std/algorithm
-import std/strutils # Why import this if std/os imports it?
 import std/re
-import ddl
-# import std/parsecfg
-#import std/sequtils
-#import std/dirs
-#import std/files
+import ddl #ddl exports strutils
 #import magic
 
-when defined(release):
-
-  let release = true
-
-else:
-
-  let release = false
-
-type file = tuple
+type File = tuple
   name: string
   time: Time
 
 var
-  images: seq[file]
-  videos: seq[file]
-  m = newMimetypes()
-  appdir = getAppDir()
-  parentdir = parentDir(getAppDir())
-  deletecontaining: seq[string]
+  images: seq[File]
+  videos: seq[File]
 
-proc isOnPath(): bool =
+let m = newMimetypes()
 
-    let path = split(getEnv("PATH"),":")
+proc processFile(filename: string, substring: string = ".*") =
 
-    appdir in path
+  var 
+    file: File
+    searchfor: Regex
+    
+  if substring.contains({'A'..'Z'}):
+    searchfor = re(substring)
+  else:
+    searchfor = re(substring, {reIgnoreCase})
+
+  if "_unpack" notin filename:
+    if filename.contains(searchfor):
+      let ext = splitFile(filename).ext
+      let mimetype = m.getMimetype(ext)
+      file.name = filename
+      try:
+        file.time = filename.getCreationTime()
+      except OSError:
+        discard
+      if "image" in mimetype:
+        images.add(file)
+      elif "video" in mimetype:
+        videos.add(file)
+      # elif expandTilde("~/Downloads") in filename and not filename.extractFileName.endsWith(".zip") and not filename.extractFileName.endsWith(".rar"):
+      #   filename.removeFile()
 
 proc help(errorlevel: int = QuitSuccess) =
-  echo "Usage: ", extractFileName(getAppFileName()), " [OPTION]... [DIRECTORY] [default: ~/Downloads]\n"
+  echo "Usage: ", extractFileName(getAppFileName()), " [OPTION]... [DIRECTORY]... [default: ~/Downloads] [FILE]...\n"
   echo """
-  Display images and videos contained in a DIRECTORY where each absolute pathname contains some regex.
-  If no regex is given display all.  By default sorted newest to oldest. 
+  Display images and videos contained in DIRECTORYs and FILEs where each absolute pathname contains some regex.
+  If no regex is given display all.  Options and arguments may appear in any order. 
   """
-  # echo ""
   echo """
   The options are:
   
@@ -58,84 +64,14 @@ proc help(errorlevel: int = QuitSuccess) =
   An equal sign or a colon separates the option from the option value.
   """
   quit(errorlevel)
-
-proc openConfig() =
-
-  try:
-
-    if release and isOnPath():
-
-      deletecontaining = readFile(getHomeDir() / ".config/vd/vd.cfg").split("\n")
-
-    else:
-
-      deletecontaining = readFile(parentdir / ".config/vd/vd.cfg").split("\n")
-
-  except IOerror:
-
-    discard
-
-# proc processFile(filename: string, substring: string = ".*") =
-proc processFile(filename: string, substring: string = ".*") =
-
-  var file: file
-
-  var searchfor: Regex
-    
-  if substring.contains({'A'..'Z'}):
-
-    searchfor = re(substring)
-
-  else:
-
-    searchfor = re(substring, {reIgnoreCase})
-
-  if "_unpack" notin filename:
-
-    for s in deletecontaining:
-
-      if expandTilde("~/Downloads") in filename and s in filename and s.len > 0:
-
-        filename.removeFile()
-
-    if filename.contains(searchfor):
-      
-      var ext = splitFile(filename).ext
-  
-      var mimetype = m.getMimetype(ext)
-
-      file.name = filename
-
-      try:
-
-        file.time = filename.getCreationTime()
-
-      except OSError:
-
-        discard
-    
-      if "image" in mimetype:
-
-        images.add(file)
-
-      elif "video" in mimetype:
-
-        videos.add(file)
-
-      elif expandTilde("~/Downloads") in filename:
-
-        filename.removeFile()
        
 var
   sort: string = "n"
   minutes: Natural = high(Natural)
   substr: string
-  args: seq[string] #= commandLineParams()
+  args: seq[string]
   p = initOptParser()
-  
-if "-h" in args:
-  help()
-  
+
 while true:
   p.next()
   case p.kind
@@ -162,45 +98,33 @@ while true:
         quit("Option -f requires an argument.")
       else:
         substr = p.val
-
     of "h":
       help()
     else:
-
       quit("Invalid option -" & $p.key & ".")
-
   of cmdArgument:
-
     args.add(p.key)
 
 if args.len == 0:
-
   args.add(expandTilde("~/Downloads"))
 
-openConfig()
-    
 for a in args:
-
   if a.fileExists():
-
     processFile(a, substr)
-
   elif a.dirExists():
-
     for f in walkDirRec(a):
-
       processFile(f, substr)
 
-proc sorttimeasc(x, y: file): int =
+proc sorttimeasc(x, y: File): int =
   cmp(x.time, y.time)
 
-proc sorttimedes(x, y: file): int =
+proc sorttimedes(x, y: File): int =
   cmp(y.time, x.time)
 
-proc sortnameasc(x, y: file ): int =
+proc sortnameasc(x, y: File ): int =
   cmp(x.name.toLowerAscii(), y.name.toLowerAscii())
   
-proc sortnamedes(x, y: file ): int =
+proc sortnamedes(x, y: File ): int =
   cmp(y.name.toLowerAscii(), x.name.toLowerAscii())
 
 case sort
@@ -217,8 +141,8 @@ case sort
     images.sort(sortnamedes)
     videos.sort(sortnamedes)
   else:
-
     discard
+
 if images.len > 0:
   let (tfile, path) = createTempFile("images", ".tmp")
   defer: path.removeFile()
@@ -226,7 +150,6 @@ if images.len > 0:
     tfile.write f.name, "\n"
   tfile.setFilePos 0
   discard execShellCmd("feh -dqFf " & path & "&> /dev/null")
-  # path.removeFile()
 else:
   echo "No images found!"
   
@@ -237,7 +160,6 @@ if videos.len > 0:
     tfile.write f.name, "\n"
   tfile.setFilePos 0
   discard execShellCmd("mpv --really-quiet --playlist=" & path)
-  # path.removeFile()
 else:
   echo "No videos found!"
 

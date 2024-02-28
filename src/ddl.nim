@@ -1,6 +1,6 @@
 import std/os
 import std/times
-import std/strutils
+from std/strutils import parseInt, `%`
 export strutils
 
 const downloads = expandTilde("~/Downloads")
