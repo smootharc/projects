@@ -19,7 +19,7 @@ var
 
 let m = newMimetypes()
 
-proc processFile(filename: string, substring: string = ".*") =
+template processFile(filename: string, substring: string = ".*") =
 
   var 
     file: File

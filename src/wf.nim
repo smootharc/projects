@@ -8,15 +8,13 @@ import noise
 
 let appName = extractFileName(getAppFileName())
 
-var release: bool
-
 when defined(release):
 
-  release = true
+  const release = true
 
 else:
 
-  release = false
+  const release = false
 
 proc opendb(readonly: bool = false): DbConn =
 
