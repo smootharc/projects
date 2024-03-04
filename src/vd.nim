@@ -19,6 +19,8 @@ var
 
 let m = newMimetypes()
 
+let deletenot = re(".*par2|.*zip|.*rar|.*r[[:digit]]{2}")
+
 template processFile(filename: string, substring: string = ".*") =
 
   var 
@@ -44,7 +46,8 @@ template processFile(filename: string, substring: string = ".*") =
       elif "video" in mimetype:
         videos.add(file)
       # elif expandTilde("~/Downloads") in filename and not filename.extractFileName.endsWith(".zip") and not filename.extractFileName.endsWith(".rar"):
-      #   filename.removeFile()
+      elif expandTilde("~/Downloads") in filename and not filename.endsWith(deletenot):
+        filename.removeFile()
 
 proc help(errorlevel: int = QuitSuccess) =
   echo "Usage: ", extractFileName(getAppFileName()), " [OPTION]... [DIRECTORY]... [default: ~/Downloads] [FILE]...\n"
