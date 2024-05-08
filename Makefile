@@ -1,4 +1,4 @@
-all: 
+all: wf 
 
 wf:
 ifeq ($(release),1)
@@ -46,3 +46,4 @@ install:
 	# install -vC src/dose.py ~/.local/bin/dose
 	install -vC bin/dose ~/.local/bin/dose
 	install -vC src/synchome.sh ~/.local/bin/synchome
+	install -vC src/bp ~/.local/bin/bp
