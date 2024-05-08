@@ -30,7 +30,7 @@ proc opendb(readonly: bool = false): DbConn =
 
   if release and isOnPath():# and isOnPath():
     
-    dbpath = getHomeDir() / ".local/share/medical.db"
+    dbpath = getDataDir() / "medical.db"
 
   else:
 

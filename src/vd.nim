@@ -106,7 +106,7 @@ while true:
     else:
       quit("Invalid option -" & $p.key & ".")
   of cmdArgument:
-    args.add(p.key)
+    args.add(p.key.absolutePath)
 
 if args.len == 0:
   args.add(expandTilde("~/Downloads"))
