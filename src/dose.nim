@@ -29,7 +29,7 @@ proc opendb(readonly: bool = false): DbConn =
 
   if release and isOnPath():# and isOnPath():
     
-    dbpath = getHomeDir() / ".local/share/medical.db"
+    dbpath = getDataDir() / "medical.db"
 
   else:
 
@@ -198,7 +198,7 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
 
   var date = ""
 
-  var count = 0
+  # var count = 0
   
   for row in rows:
 
@@ -212,14 +212,15 @@ proc select(begintime, endtime: DateTime, search: Option[string]) =
 
       date = row[0]
 
-      if count != 0:
+    #   if count != 0:
 
-        echo ""
+      echo ""
 
-    inc count  
+    # inc count  
 
     # echo alignLeft($count,7), alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", row[3], "\t", row[4]
-    echo alignLeft($count,7), alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", alignleft(row[3],25), row[4]
+    # echo alignLeft($count,7), alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", alignleft(row[3],25), row[4]
+    echo alignleft(date,10), align(row[1], 7),  align(row[2], 7), "  ", alignleft(row[3],25), row[4]
 
 proc insert(name: string, datetime: DateTime, comment: string = "") =
 
@@ -337,7 +338,7 @@ proc delete(id: int) =
 
   if db.tryExec(sql"delete from dose where id = ?", id):
 
-    stdout.write("Confirm the deletion of the weight record with the ID: " & $id & " by pressing y. ")
+    stdout.write("Confirm the deletion of the dose record with the ID: " & $id & " by pressing y. ")
     
     var answer = getch()
 
