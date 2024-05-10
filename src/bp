@@ -83,11 +83,12 @@ function select
 
     end
 
-    for row in (sqlite3 -batch $db ".headers off" "select * from bp order by datetime")
+    for row in (sqlite3 -batch $db ".headers off" "select id, datetime, systolic, diastolic, hr, comment from bp order by datetime")
 
         set row (string split '|' $row)
 
-        echo "$row[1] $row[2] $row[3]/$row[4]  $row[5]   $row[6]"
+        # echo "$row[1] $row[2] $row[3]/$row[4]  $row[5]   $row[6]"
+        printf "%-5d %s %4d/%d %4d  %s\n" $row[1] $row[2] $row[3] $row[4] $row[5] $row[6]
 
     end
 
@@ -123,7 +124,7 @@ function insert
 
     end    
 
-    if string match -q --regex '^1\d{2}\/\d{2}$' -- $argv[1]
+    if string match -q --regex '^\d{2,3}\/\d{2}$' -- $argv[1]
 
         set bp (string split / $argv[1])
 
@@ -170,15 +171,29 @@ function update
 
     or return
 
-    if set -q _flag_h
-
+    function help
+    
         echo "Usage: $commandname update: [Option] ID
 
-    Update the Boood Pressure record having the given ID number. 
+    Update the Boood Pressure record having the given integer ID number. 
 
     Option:
         -h Print help message.
     "
+
+    end
+
+    if test (count $argv) -eq 0 || string match -qvr '\d+' -- $argv[1]
+
+        help
+
+        return 1
+
+    end
+
+    if set -q _flag_h
+
+        help
 
         return
 
@@ -204,55 +219,81 @@ function update
     set -l hr $row[4]
     set -l comment $row[5]
 
-    while true
+    function isempty
 
-        read -c $datetime -fP"DateTime: " datetime
+        if not string length -q $argv[1]
+
+            exit 0
+
+        end
+
+    end
+
+    while read -c $datetime -fP"DateTime: " datetime
 
         if isValidDate $datetime
 
             break
 
+        else
+
+            echo "Invalid date."
+
         end
         
     end
 
-    while true
+    isempty $datetime
 
-        read -c $systolic -fP"Systolic: " systolic
+    while read -c $systolic -fP"Systolic: " systolic
 
-        if string match -qr '^1\d{2}$' $systolic
+        if string match -qr '^\d{2,3}$' $systolic
 
             break
+
+        else
+
+            echo "Invalid systolic blood presure."
 
         end
 
     end
 
-    while true
+    isempty $systolic
 
-        read -c $diastolic -fP"Diastolic: " diastolic
+    while read -c $diastolic -fP"Diastolic: " diastolic
 
         if string match -qr '^\d{2}$' $diastolic
 
             break
 
+        else
+
+            echo "Invalid diastolic blood pressure."
+
         end
 
     end
 
-    while true
-
-        read -c $hr -fP"Heart Rate: " hr
+    while read -c $hr -fP"Heart Rate: " hr
 
         if string match -qr '^\d{2,3}$' $hr
 
             break
 
+        else
+
+            echo "Invalid heart rate."
+
         end
 
     end
+    
+    isempty $diastolic
 
     read -c $comment -fP"Comment: " comment
+
+    isempty $comment
 
     set changed (sqlite3 -batch $db ".headers off" "update bp set datetime = '$datetime', systolic = $systolic, diastolic = $diastolic, hr = $hr, comment = '$comment' where id = $id; select changes()")
 
@@ -274,15 +315,29 @@ function delete
 
     or return
 
-    if set -q _flag_h
+    function help
 
         echo "Usage: $commandname delete: [Option] ID
 
-    Delete the Boood Pressure record having the given ID number. 
+    Delete the Boood Pressure record having the given integer ID number. 
 
     Option:
         -h Print help message.
     "
+
+    end    
+
+    if test (count $argv) -eq 0 || string match -qvr '\d+' -- $argv[1]
+
+        help
+
+        return 1
+
+    end
+
+    if set -q _flag_h
+
+        help
 
         return
 
