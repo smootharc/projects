@@ -1,10 +1,10 @@
 #!/usr/bin/env fish
 
 if string match -q (status dirname) -- $PATH
-    
+
     set db ~/.local/share/medical.db
 
-else if string match -q 'src' -- (status dirname)
+else if string match -q src -- (status dirname)
 
     set db ../.local/share/medical.db
 
@@ -26,7 +26,7 @@ end
 
 function avg
 
-    argparse -n "$commandname select" 'h' -- $argv
+    argparse -n "$commandname select" h -- $argv
 
     or return
 
@@ -34,7 +34,7 @@ function avg
 
         echo "Usage: $commandname avg: [Option] [LIMIT]  
 
-    Print the average blood pressure and heart rate from the blood pressure database table.
+    Print the average blood pressure and heart rate from the blood pressure table.
     Optionally limit the average to the last LIMIT number of records.
 
     Option:
@@ -58,14 +58,14 @@ function avg
     set avg (sqlite3 -batch $db ".headers off" $query)
 
     set avg (string split '|' $avg)
-    
+
     echo -e "Average Blood Pressure: $avg[1]/$avg[2] and Heart Rate: $avg[3]"
 
 end
 
 function select
 
-    argparse -n "$commandname select" 'h' -- $argv
+    argparse -n "$commandname select" h -- $argv
 
     or return
 
@@ -73,7 +73,7 @@ function select
 
         echo "Usage: $commandname select: [Option]
 
-    Print rows from the blood pressure database table.
+    Print rows from the blood pressure table.
 
     Option:
         -h Print help message.
@@ -96,21 +96,21 @@ end
 
 function insert
 
-    argparse -n "$commandname insert" 'h' 'c=' -- $argv
+    argparse -n "$commandname insert" h 'c=' -- $argv
     or return
 
     if set -q _flag_h
 
         echo "Usage: $commandname insert: [Options]... BP HR
 
-    Insert a blood pressure (BP) and heart rate (HR) measurement into the blood pressure database table.
+    Insert a blood pressure (BP) and heart rate (HR) measurement into the blood pressure table.
 
     Options:
         -c COMMENT        
         -h Print help message.
 
     Arguments:
-        BP: BP Must be of the form 1dd/dd.  Where d is an digit.
+        BP: BP Must be of the form ddd/dd or dd/dd.  Where d is a digit.
         HR: HR Must be of either two or three digits.
     "
 
@@ -122,7 +122,7 @@ function insert
 
         set comment $_flag_c
 
-    end    
+    end
 
     if string match -q --regex '^\d{2,3}\/\d{2}$' -- $argv[1]
 
@@ -130,11 +130,11 @@ function insert
 
     else
 
-        echo "$commandname insert: Incorrect BP.  Blood pressure must be of the form '1dd/dd' where d is a single digit."
+        echo "$commandname insert: Incorrect BP.  Blood pressure must be of the form 'ddd/dd' or 'dd/dd' where d is a single digit."
 
         return 1
 
-    end    
+    end
 
     if string match -q --regex '^\d{2,3}$' -- $argv[2]
 
@@ -146,7 +146,7 @@ function insert
 
         return 1
 
-    end    
+    end
 
     set id (sqlite3 -batch $db ".headers off" "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()")
 
@@ -167,15 +167,15 @@ end
 
 function update
 
-    argparse -n "$commandname update" 'h' -- $argv
+    argparse -n "$commandname update" h -- $argv
 
     or return
 
     function help
-    
+
         echo "Usage: $commandname update: [Option] ID
 
-    Update the Boood Pressure record having the given integer ID number. 
+    Update the blood pressure record having the given integer ID number. 
 
     Option:
         -h Print help message.
@@ -240,7 +240,7 @@ function update
             echo "Invalid date."
 
         end
-        
+
     end
 
     isempty $datetime
@@ -288,12 +288,12 @@ function update
         end
 
     end
-    
+
     isempty $diastolic
 
     read -c $comment -fP"Comment: " comment
 
-    isempty $comment
+    # isempty $comment
 
     set changed (sqlite3 -batch $db ".headers off" "update bp set datetime = '$datetime', systolic = $systolic, diastolic = $diastolic, hr = $hr, comment = '$comment' where id = $id; select changes()")
 
@@ -311,7 +311,7 @@ end
 
 function delete
 
-    argparse -n "$commandname delete" 'h' -- $argv
+    argparse -n "$commandname delete" h -- $argv
 
     or return
 
@@ -319,13 +319,13 @@ function delete
 
         echo "Usage: $commandname delete: [Option] ID
 
-    Delete the Boood Pressure record having the given integer ID number. 
+    Delete the blood pressure record having the given integer ID number. 
 
     Option:
         -h Print help message.
     "
 
-    end    
+    end
 
     if test (count $argv) -eq 0 || string match -qvr '\d+' -- $argv[1]
 
@@ -385,9 +385,9 @@ switch $argv[1]
 
         delete $argv[2]
 
-    case avg 
+    case avg
 
-        avg $argv[2] 
+        avg $argv[2]
 
     case '*'
 
