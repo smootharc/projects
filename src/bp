@@ -71,9 +71,10 @@ function select
 
     if set -q _flag_h
 
-        echo "Usage: $commandname select: [Option]
+        echo "Usage: $commandname select: [Option] [LIMIT]
 
-    Print rows from the blood pressure table.
+    Print records from the blood pressure table.
+    Optionally print only the last LIMIT number of records.
 
     Option:
         -h Print help message.
@@ -83,11 +84,22 @@ function select
 
     end
 
-    for row in (sqlite3 -batch $db ".headers off" "select id, datetime, systolic, diastolic, hr, comment from bp order by datetime")
+    if string match -qr '\d+' $argv[1]
+
+        set query "select id, datetime, systolic, diastolic, hr, comment from (select id, datetime, systolic, diastolic, hr, comment from bp order by datetime desc limit $argv[1]) order by datetime asc"
+
+    else
+
+        set query "select id, datetime, systolic, diastolic, hr, comment from bp order by datetime"
+
+    end
+
+    # for row in (sqlite3 -batch $db ".headers off" "select id, datetime, systolic, diastolic, hr, comment from bp order by datetime")
+    printf "%-5s %-10s %-6s %-8s %-3s %s\n" ID Date Time BP HR Comment
+    for row in (sqlite3 -batch $db ".headers off" $query)
 
         set row (string split '|' $row)
 
-        # echo "$row[1] $row[2] $row[3]/$row[4]  $row[5]   $row[6]"
         printf "%-5d %s %4d/%d %4d  %s\n" $row[1] $row[2] $row[3] $row[4] $row[5] $row[6]
 
     end
