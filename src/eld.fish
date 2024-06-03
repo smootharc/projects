@@ -4,7 +4,7 @@ function help
 
     echo -e "Usage: "(status basename) "[-h/--help]" dosesPrescribed dosesPerDay dosesTaken "\n"
 
-    echo -e "This program calculates the estimated date and time of the last dose of a prescription medication.\n" 
+    echo -e "This program calculates the estimated date and time of the last dose of a prescription medication.\n"
 
     echo "All three arguments are required and must be integers. If -h or --help is provided all others will be ignored."
 
@@ -36,11 +36,11 @@ function main -a dosesPrescribed dosesPerDay dosesTaken
 
     echo "Time left until the last dose: $days Days and $hours Hours"
 
-    echo "Date and time of the last dose is:" (date -Rd "+$days days +$hours hours") 
+    echo "Date and time of the last dose is:" (date -Rd "+$days days +$hours hours")
 
 end
 
-argparse -n (status basename) 'h/help' -- $argv
+argparse -n (status basename) h/help -- $argv
 
 or help 1
 
