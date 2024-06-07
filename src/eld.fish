@@ -32,11 +32,31 @@ function main -a dosesPrescribed dosesPerDay dosesTaken
 
     set -l fractionalHours (math $daysAndHours - $days)
 
-    set -l hours (math -s0 $fractionalHours x 24)
+    set -l hours (math -s1 $fractionalHours x 24)
 
-    echo "Time left until the last dose: $days Days and $hours Hours"
+    if test $days -eq 1
 
-    echo "Date and time of the last dose is:" (date -Rd "+$days days +$hours hours")
+        set daysstring "$days Day"
+
+    else
+
+        set daysstring "$days Days"
+
+    end
+
+    if test $hours -eq 1
+
+        set hoursstring "$hours Hour"
+
+    else
+
+        set hoursstring "$hours Hours"
+
+    end
+
+    echo "Time left until the last dose: $daysstring and $hoursstring"
+
+    echo "Date and time of the last dose is:" (date -d "+$days days +$hours hours" "+%A, %d %B %Y %H:%M")
 
 end
 
