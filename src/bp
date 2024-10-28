@@ -6,7 +6,7 @@ if string match -q (status dirname) -- $PATH
 
 else if string match -q src -- (status dirname)
 
-    set db ../.local/share/medical.db
+    set db ~/projects/.local/share/medical.db
 
 else
 
@@ -20,7 +20,19 @@ set commandname (status basename)
 
 function isValidDate
 
-    test 16 -eq (string length $argv); and datetest --isvalid -i '%Y-%m-%d %H:%M' $argv
+    if test 16 -eq (string length $argv)
+
+        and datetest --isvalid -i '%Y-%m-%d %H:%M' $argv
+
+        return 0
+
+    else
+
+        return 1
+
+    end
+
+    # test 16 -eq (string length $argv); and datetest --isvalid -i '%Y-%m-%d %H:%M' $argv
 
 end
 
@@ -55,7 +67,7 @@ function avg
 
     end
 
-    set avg (sqlite3 -batch $db ".headers off" $query)
+    set avg (sqlite3 -batch "file:$db?mode=ro" ".headers off" $query)
 
     set avg (string split '|' $avg)
 
@@ -71,7 +83,7 @@ function select
 
     if set -q _flag_h
 
-        echo "Usage: $commandname select: [Option] [LIMIT]
+        echo "Usage: $commandname select [Option] [LIMIT]
 
     Print records from the blood pressure table.
     Optionally print only the last LIMIT number of records.
@@ -96,7 +108,7 @@ function select
 
     # for row in (sqlite3 -batch $db ".headers off" "select id, datetime, systolic, diastolic, hr, comment from bp order by datetime")
     printf "%-5s %-10s %-6s %-8s %-3s %s\n" ID Date Time BP HR Comment
-    for row in (sqlite3 -batch $db ".headers off" $query)
+    for row in (sqlite3 -batch "file:$db?mode=ro" ".headers off" $query)
 
         set row (string split '|' $row)
 
@@ -108,10 +120,11 @@ end
 
 function insert
 
-    argparse -n "$commandname insert" h 'c=' -- $argv
+    argparse -n "$commandname insert" h 'c=' 't=' -- $argv
+
     or return
 
-    if set -q _flag_h
+    function help
 
         echo "Usage: $commandname insert: [Options]... BP HR
 
@@ -119,12 +132,21 @@ function insert
 
     Options:
         -c COMMENT        
+        -t TIME  
         -h Print help message.
+
+        The valid TIME format is %Y-%m-%d %H:%M        
 
     Arguments:
         BP: BP Must be of the form ddd/dd or dd/dd.  Where d is a digit.
         HR: HR Must be of either two or three digits.
     "
+
+    end
+
+    if set -q _flag_h
+
+        help
 
         return
 
@@ -136,13 +158,34 @@ function insert
 
     end
 
+    if set -q _flag_t
+
+        set datetime $_flag_t
+
+        if not isValidDate $datetime
+
+            # echo "$commandname insert: Invalid TIME. The valid TIME format is %Y-%m-%d %H:%M"
+            help
+
+            return 1
+
+        end
+
+    else
+
+        set datetime ''
+
+    end
+
+
     if string match -q --regex '^\d{2,3}\/\d{2}$' -- $argv[1]
 
         set bp (string split / $argv[1])
 
     else
 
-        echo "$commandname insert: Incorrect BP.  Blood pressure must be of the form 'ddd/dd' or 'dd/dd' where d is a single digit."
+        help
+        # echo "$commandname insert: Incorrect BP.  Blood pressure must be of the form 'ddd/dd' or 'dd/dd' where d is a single digit."
 
         return 1
 
@@ -160,7 +203,18 @@ function insert
 
     end
 
-    set id (sqlite3 -batch $db ".headers off" "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()")
+    if isValidDate $datetime
+
+        set query "insert into bp (datetime, systolic, diastolic, hr, comment) values('$datetime', $bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()"
+
+    else
+
+        set query "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()"
+
+    end
+
+    # set id (sqlite3 -batch $db ".headers off" "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()")
+    set id (sqlite3 -batch $db ".headers off" $query)
 
 
     if test $id -gt 0
