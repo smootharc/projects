@@ -112,7 +112,7 @@ function select
 
         set row (string split '|' $row)
 
-        printf "%-5d %s %4d/%d %4d  %s\n" $row[1] $row[2] $row[3] $row[4] $row[5] $row[6]
+        printf "%-5d %s %4d/%-3d %4d  %s\n" $row[1] $row[2] $row[3] $row[4] $row[5] $row[6]
 
     end
 
@@ -178,7 +178,7 @@ function insert
     end
 
 
-    if string match -q --regex '^\d{2,3}\/\d{2}$' -- $argv[1]
+    if string match -q --regex '^\d{2,3}\/\d{2,3}$' -- $argv[1]
 
         set bp (string split / $argv[1])
 
