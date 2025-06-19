@@ -6,10 +6,11 @@ use 5.40.2;
 use Cwd;
 use File::Find;
 use File::MimeInfo;
-use File::Temp;
-use Getopt::Long qw(:config pass_through);
-use vars qw($files $minutes $sort $help @files %mtimes @args);
+use File::Temp qw/ tempfile /;
+use File::Basename;
+use Getopt::Long;
 use English;
+use vars qw(@args @files @videos @images $files $minutes $sort $help %mtimes);
 
 sub help {
   
@@ -46,36 +47,31 @@ $minutes = -1;
 
 $sort = 'n';
 
-GetOptions('files:s' => \$files,
-           'minutes:i' => \$minutes,
-           'sort:s' => \$sort,
-           'help' => \$help)
-         or die(help(1));
+my $valid_option = GetOptions(
+  'files:s' => \$files,
+  'minutes:i' => \$minutes,
+  'sort:s' => \$sort,
+  'help' => \$help);
 
+unless ( $valid_option ) { print "\n"; help 1};
 
-help if $help;
-
-# say for @ARGV;
-# say $sort;
-# sleep 5;
-# newest, oldest, alphabetical, reverse alphabetical
 my @sortoptions = ("n", "o", "a", "r");
 
-unless (length($sort) == 1 and (grep /^$sort$/, @sortoptions)) {
+unless (length($sort) == 1 and (grep {/^$sort$/i} @sortoptions)) {
 
   help(1);
   
 }
 
+help if $help;
+
 while (<@ARGV>) {
 
-  unless (-d or -f) { next }
+  unless (-d or -f) { say basename($0), ": $ARG is not a file or directory."; exit 1 }
 
   push @args, $ARG;
 
 }
-
-# say for @args;
 
 unless (@args) {
 
@@ -103,23 +99,15 @@ foreach (@args) {
 
 chop(@files);
 
-# @files = sort {lc($a) cmp lc($b) } @files;
-
-# foreach my $key (sort { lc($b) cmp lc($a) } keys %mtimes) {
-
-#   print($key, " ", $mtimes{$key}, "\n")
-  
-# }
-
-# my @values = ( sort { $b cmp $a } values %mtimes )
-
 if ( $sort eq "a" ) {
 
   my @files= sort {lc($a) cmp lc($b) } @files;
 
+  
+
   foreach ( @files) {
 
-    say($ARG);
+    say($ARG, mimetype($ARG));
 
   }
 
@@ -131,7 +119,7 @@ if ( $sort eq "a" ) {
 
   foreach ( @files ) {
 
-    say($ARG);
+    say($ARG, mimetype($ARG));
 
   }
 
@@ -165,3 +153,5 @@ if ( $sort eq "o" ) {
   }
 
 }
+
+
