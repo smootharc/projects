@@ -13,9 +13,9 @@ use English;
 use vars qw(@args @files @videos @images $files $minutes $sort $help %mtimes);
 
 sub help {
-  
+    
   say "Usage: vd [OPTION]... [DIRECTORY]... [default: ~/Downloads] [FILE]...
-
+  
     Display images and videos contained in DIRECTORYs and FILEs where each absolute pathname contains some regex.
     If no regex is given display all.  Options and arguments may appear in any order. 
   

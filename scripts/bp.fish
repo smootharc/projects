@@ -177,7 +177,6 @@ function insert
 
     end
 
-
     if string match -q --regex '^\d{2,3}\/\d{2,3}$' -- $argv[1]
 
         set bp (string split / $argv[1])
@@ -215,7 +214,6 @@ function insert
 
     # set id (sqlite3 -batch $db ".headers off" "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()")
     set id (sqlite3 -batch $db ".headers off" $query)
-
 
     if test $id -gt 0
 
