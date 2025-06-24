@@ -1,4 +1,8 @@
-test.nim
 .local
 .config
-bin
+vd/vd
+vd/src/ddl.nim
+eld/eld
+dose/dose
+wf/wf
+ddl/ddl
