@@ -103,11 +103,9 @@ if ( $sort eq "a" ) {
 
   my @files= sort {lc($a) cmp lc($b) } @files;
 
-  
-
   foreach ( @files) {
 
-    say($ARG, mimetype($ARG));
+    say($ARG, " ", mimetype($ARG));
 
   }
 
@@ -119,7 +117,7 @@ if ( $sort eq "a" ) {
 
   foreach ( @files ) {
 
-    say($ARG, mimetype($ARG));
+    say($ARG, " ", mimetype($ARG));
 
   }
 
