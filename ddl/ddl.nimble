@@ -11,3 +11,6 @@ bin           = @["ddl"]
 # Dependencies
 
 requires "nim >= 2.2.4"
+
+task deploy, "Install ddl to ~/.local/bin":
+  exec "nim c -d:release --app:console --opt:speed --outdir:$HOME/.local/bin src/ddl.nim"
