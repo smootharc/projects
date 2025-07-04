@@ -6,7 +6,7 @@ import std/times
 import std/tempfiles
 import std/algorithm
 import std/re
-import ddl #ddl exports strutils
+import ../../ddl/src/ddl
 #import magic
 
 type File = tuple
