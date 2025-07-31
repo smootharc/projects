@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "Weight Statistics"
+echo "-----------------"
+# echo
+# sqlite3 -batch ~/.local/share/medical.db '.mode columns' 'select date as "Start Date", weight as "Weight" from weight where weight > 0 order by date limit 1'
+echo
+sqlite3 -batch -readonly ~/.local/share/medical.db '.mode columns' 'select date as Date, weight as "Min/Max Weights" from weight where weight = (select max(weight) from weight) or weight = (select min(weight) from weight where weight > 0) order by weight'
+echo
+sqlite3 -batch -readonly  ~/.local/share/medical.db '.mode columns' 'select row_number() over (order by weight asc) "#", date as Date,weight as "25 Lowest Weights" from weight where weight > 0 limit 25'
