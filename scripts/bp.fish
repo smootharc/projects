@@ -1,22 +1,42 @@
 #!/usr/bin/env fish
 
-if string match -q (status dirname) -- $PATH
+set commandname (status basename)
 
-    set db ~/.local/share/medical.db
+function sqlexec
 
-else if string match -q src -- (status dirname)
+    argparse -n $commandname r -- $argv
 
-    set db ~/projects/.local/share/medical.db
+    or return 1
 
-else
+    if set -q _flag_r
 
-    echo "Can't find database file."
+        set cmd sqlite3 -batch -readonly
 
-    exit 1
+    else
+
+        set cmd sqlite3 -batch
+
+    end
+
+    if string match -q (realpath (status dirname)) -- $PATH
+
+        set db ~/.local/share/medical.db
+
+    else if string match -q '*projects*' -- (realpath (status dirname))
+
+        set db ~/projects/.local/share/medical.db
+
+    else
+
+        echo "Can't find database file."
+
+        return 1
+
+    end
+
+    $cmd $db ".headers off" "$argv"
 
 end
-
-set commandname (status basename)
 
 function isValidDate
 
@@ -28,38 +48,45 @@ function isValidDate
 
     else
 
-        return 1
+        # return 1
 
     end
-
-    # test 16 -eq (string length $argv); and datetest --isvalid -i '%Y-%m-%d %H:%M' $argv
 
 end
 
 function avg
 
-    argparse -n "$commandname select" h -- $argv
+    function help
 
-    or return
-
-    if set -q _flag_h
-
-        echo "Usage: $commandname avg: [Option] [LIMIT]  
+        echo "Usage: $commandname avg [Option]  
 
     Print the average blood pressure and heart rate from the blood pressure table.
     Optionally limit the average to the last LIMIT number of records.
+    All other arguments will be silently ignored.
 
     Option:
-        -h Print help message.
-    "
+        -l LIMIT must be an integer greater than zero.
+        -h Print help message."
+
+    end
+
+    if contains -- -h $argv
+
+        help
 
         return
 
     end
 
-    if string match -qr '\d+' $argv[1]
+    argparse -n "$commandname $(status function)" 'l=!_validate_int --min 1 "$_flag_value"' -- $argv
 
-        set query "select round(avg(systolic),2), round(avg(diastolic),2), round(avg(hr),2) from (select systolic, diastolic, hr from bp order by datetime desc limit $argv[1])"
+    or return 1
+
+    if set -q _flag_l
+
+        set limit $_flag_l
+
+        set query "select round(avg(systolic),2), round(avg(diastolic),2), round(avg(hr),2) from (select systolic, diastolic, hr from bp order by datetime desc limit $limit)"
 
     else
 
@@ -67,7 +94,7 @@ function avg
 
     end
 
-    set avg (sqlite3 -batch "file:$db?mode=ro" ".headers off" $query)
+    set avg (sqlexec -r $query)
 
     set avg (string split '|' $avg)
 
@@ -77,28 +104,37 @@ end
 
 function select
 
-    argparse -n "$commandname select" h -- $argv
+    function help
 
-    or return
-
-    if set -q _flag_h
-
-        echo "Usage: $commandname select [Option] [LIMIT]
+        echo "Usage: $commandname $(status function) [Option]
 
     Print records from the blood pressure table.
     Optionally print only the last LIMIT number of records.
+    All other command arguments will be ignored.
 
     Option:
-        -h Print help message.
-    "
+        -l LIMIT must be an integer greater than zero.
+        -h Print this help message."
+
+    end
+
+    if contains -- -h $argv
+
+        help
 
         return
 
     end
 
-    if string match -qr '\d+' $argv[1]
+    argparse -n "$commandname $(status function)" 'l=!_validate_int --min 1 "$_flag_value"' -- $argv
 
-        set query "select id, datetime, systolic, diastolic, hr, comment from (select id, datetime, systolic, diastolic, hr, comment from bp order by datetime desc limit $argv[1]) order by datetime asc"
+    or return 1
+
+    if set -q _flag_l
+
+        set limit $_flag_l
+
+        set query "select id, datetime, systolic, diastolic, hr, comment from (select id, datetime, systolic, diastolic, hr, comment from bp order by datetime desc limit $limit) order by datetime asc"
 
     else
 
@@ -108,7 +144,8 @@ function select
 
     # for row in (sqlite3 -batch $db ".headers off" "select id, datetime, systolic, diastolic, hr, comment from bp order by datetime")
     printf "%-5s %-10s %-6s %-8s %-3s %s\n" ID Date Time BP HR Comment
-    for row in (sqlite3 -batch "file:$db?mode=ro" ".headers off" $query)
+
+    for row in (sqlexec -r $query)
 
         set row (string split '|' $row)
 
@@ -120,13 +157,9 @@ end
 
 function insert
 
-    argparse -n "$commandname insert" h 'c=' 't=' -- $argv
-
-    or return
-
     function help
 
-        echo "Usage: $commandname insert: [Options]... BP HR
+        echo "Usage: $commandname insert [Options]... BP HR
 
     Insert a blood pressure (BP) and heart rate (HR) measurement into the blood pressure table.
 
@@ -139,18 +172,21 @@ function insert
 
     Arguments:
         BP: BP Must be of the form ddd/dd or dd/dd.  Where d is a digit.
-        HR: HR Must be of either two or three digits.
-    "
+        HR: HR Must be of either two or three digits."
 
     end
 
-    if set -q _flag_h
+    if contains -- -h $argv
 
         help
 
         return
 
     end
+
+    argparse -n "$commandname insert" 'c=' 't=' -- $argv
+
+    or return 1
 
     if set -q _flag_c
 
@@ -164,7 +200,8 @@ function insert
 
         if not isValidDate $datetime
 
-            # echo "$commandname insert: Invalid TIME. The valid TIME format is %Y-%m-%d %H:%M"
+            echo -e "$commandname $(status function): Invalid TIME. The valid TIME format is %Y-%m-%d %H:%M\n"
+
             help
 
             return 1
@@ -177,14 +214,25 @@ function insert
 
     end
 
+    if test (count $argv) -ne 2
+
+        echo -e "$commandname $(status function): Both blood pressure and heart rate must be provided.\n"
+
+        help
+
+        return 1
+
+    end
+
     if string match -q --regex '^\d{2,3}\/\d{2,3}$' -- $argv[1]
 
         set bp (string split / $argv[1])
 
     else
 
+        echo -e "$commandname $(status function): Incorrect BP.  Blood pressure must be of the form 'ddd/dd' or 'dd/dd' where d is a single digit.\n"
+
         help
-        # echo "$commandname insert: Incorrect BP.  Blood pressure must be of the form 'ddd/dd' or 'dd/dd' where d is a single digit."
 
         return 1
 
@@ -196,7 +244,7 @@ function insert
 
     else
 
-        echo "$commandname insert: Incorrect HR.  Heart Rate must be of the form 'dd' or 'ddd' where d is a single digit."
+        echo "$commandname $(status function): Incorrect HR: $argv[2]. Heart Rate must be of the form 'dd' or 'ddd' where d is a single digit."
 
         return 1
 
@@ -204,16 +252,16 @@ function insert
 
     if isValidDate $datetime
 
-        set query "insert into bp (datetime, systolic, diastolic, hr, comment) values('$datetime', $bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()"
+        set query "insert into bp (datetime, systolic, diastolic, hr, comment) values('$datetime', $bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''));select last_insert_rowid()"
 
     else
 
-        set query "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()"
+        set query "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''));select last_insert_rowid()"
 
     end
 
     # set id (sqlite3 -batch $db ".headers off" "insert into bp (systolic, diastolic, hr, comment) values($bp[1], $bp[2], $hr,iif(length('$comment'),'$comment',''))" "select last_insert_rowid()")
-    set id (sqlite3 -batch $db ".headers off" $query)
+    set id (sqlexec $query)
 
     if test $id -gt 0
 
@@ -231,31 +279,18 @@ end
 
 function update
 
-    argparse -n "$commandname update" h -- $argv
-
-    or return
-
     function help
 
-        echo "Usage: $commandname update: [Option] ID
+        echo "Usage: $commandname update [Option] ID
 
     Update the blood pressure record having the given integer ID number. 
 
     Option:
-        -h Print help message.
-    "
+        -h Print help message."
 
     end
 
-    if test (count $argv) -eq 0 || string match -qvr '\d+' -- $argv[1]
-
-        help
-
-        return 1
-
-    end
-
-    if set -q _flag_h
+    if contains -- -h $argv
 
         help
 
@@ -263,9 +298,19 @@ function update
 
     end
 
+    if test (count $argv) -eq 0 || string match -qvr '\d+' -- $argv[1]
+
+        echo -e "$commandname $(status function): ID must be an integer.\n"
+
+        help
+
+        return 1
+
+    end
+
     set -l id $argv[1]
 
-    if test (sqlite3 -batch $db ".headers off" "select count(id) from bp where id = $id") -eq 0
+    if test (sqlexec "select count(id) from bp where id = $id") -eq 0
 
         echo "No record with the id $id exists."
 
@@ -273,7 +318,7 @@ function update
 
     end
 
-    set row (sqlite3 -batch $db ".headers off" "select datetime, systolic, diastolic, hr, comment from bp where id = $id")
+    set row (sqlexec "select datetime, systolic, diastolic, hr, comment from bp where id = $id")
 
     set row (string split '|' $row)
 
@@ -283,9 +328,14 @@ function update
     set -l hr $row[4]
     set -l comment $row[5]
 
-    function isempty
+    # If C-c then exit.
+    function isset
 
-        if not string length -q $argv[1]
+        if set -q argv[1]
+
+            return
+
+        else
 
             exit 0
 
@@ -307,7 +357,7 @@ function update
 
     end
 
-    isempty $datetime
+    isset $datetime
 
     while read -c $systolic -fP"Systolic: " systolic
 
@@ -323,7 +373,7 @@ function update
 
     end
 
-    isempty $systolic
+    isset $systolic
 
     while read -c $diastolic -fP"Diastolic: " diastolic
 
@@ -339,9 +389,12 @@ function update
 
     end
 
+    isset $diastolic
+
     while read -c $hr -fP"Heart Rate: " hr
 
         if string match -qr '^\d{2,3}$' $hr
+            and test "$hr" -lt 150
 
             break
 
@@ -353,13 +406,13 @@ function update
 
     end
 
-    isempty $diastolic
+    isset $hr
 
     read -c $comment -fP"Comment: " comment
 
-    # isempty $comment
+    isset $comment
 
-    set changed (sqlite3 -batch $db ".headers off" "update bp set datetime = '$datetime', systolic = $systolic, diastolic = $diastolic, hr = $hr, comment = '$comment' where id = $id; select changes()")
+    set changed (sqlexec "update bp set datetime = '$datetime', systolic = $systolic, diastolic = $diastolic, hr = $hr, comment = '$comment' where id = $id; select changes()")
 
     if test $changed -eq 1
 
@@ -367,7 +420,7 @@ function update
 
     else
 
-        echo "Failed to update the row whith the id: $id"
+        echo "Failed to update the row with the id: $id"
 
     end
 
@@ -375,23 +428,20 @@ end
 
 function delete
 
-    argparse -n "$commandname delete" h -- $argv
-
-    or return
-
     function help
 
-        echo "Usage: $commandname delete: [Option] ID
+        echo "Usage: $commandname $(status function) [Option] ID
 
     Delete the blood pressure record having the given integer ID number. 
 
     Option:
-        -h Print help message.
-    "
+        -h Print help message."
 
     end
 
-    if test (count $argv) -eq 0 || string match -qvr '\d+' -- $argv[1]
+    if test (count $argv) -eq 0 && string match -qr '\d+' -- $argv[1]
+
+        echo -e "$commandname $(status function): ID must be an integer.\n"
 
         help
 
@@ -399,35 +449,56 @@ function delete
 
     end
 
-    if set -q _flag_h
+    set id $argv[1]
 
-        help
+    if test (sqlexec -r "select count(id) from bp where id = $id") -eq 0
 
-        return
-
-    end
-
-    if test (sqlite3 -batch $db ".headers off" "select count(id) from bp where id = $argv[1]") -eq 0
-
-        echo "No record with the id $argv[1] exists."
+        echo "No record with the id $id exists."
 
         exit 1
 
     end
 
-    set changed (sqlite3 -batch $db ".headers off" "delete from bp where id = $argv[1]" "select changes()")
+    set changed (sqlexec "delete from bp where id = $id;select changes()")
 
     if test $changed -eq 1
 
-        echo "Successfully deleted row with the id $argv[1]"
+        echo "Successfully deleted row with the id $id"
 
     else
 
-        echo "Failed to delete row with the id $argv[1]"
+        echo "Failed to delete row with the id $id"
 
         exit 1
 
     end
+
+end
+
+function help
+
+    echo "Usage: $commandname [-h] SUBCOMMAND [ARGS]
+
+    Sub Commands:
+        select
+        insert
+        update
+        delete
+        avg
+
+    Type bp SUBCOMMAND -h for help on each SUBCOMMAND."
+
+end
+
+argparse -s -n $commandname h -- $argv
+
+or return
+
+if set -q _flag_h
+
+    help
+
+    return
 
 end
 
@@ -443,28 +514,37 @@ switch $argv[1]
 
     case update
 
-        update $argv[2]
+        update $argv[2..-1]
 
     case delete
 
-        delete $argv[2]
+        delete $argv[2..-1]
 
     case avg
 
-        avg $argv[2]
+        avg $argv[2..-1]
+
+    case -h
+
+        help
 
     case '*'
 
-        echo "Usage: $commandname SUBCOMMAND [ARGS]
+        if test (count $argv) -eq 0
 
-    Sub Commands:
-        select
-        insert
-        update
-        delete
-        avg
+            echo -e "$commandname: Command line arguments must begind with a SUBCOMMAND.\n"
 
-    Type bp SUBCOMMAND -h for help on each SUBCOMMAND
-    "
+            help
 
+            return 1
+
+        else
+
+            echo -e "$commandname: Incorrect SUBCOMMAND: $argv.\n"
+
+            help
+
+            return 1
+
+        end
 end
