@@ -42,7 +42,7 @@ puts "#   Date        25 Lowest Weights"
 puts "--  ----------  -----------------"
 
 # medical eval { select row_number() over (order by weight asc) as row, date, weight from weight where weight > 0 order by date desc limit 25 } {
-medical eval { select row_number() over (order by weight asc) as row, date, weight from weight where weight > 0 limit 25 } {
+medical eval { select row_number() over (order by weight asc, date desc) as row, date, weight from weight where weight > 0 limit 25 } {
 
   puts [format "%0-2d  %s  %s" $row $date $weight ]
   
