@@ -38,6 +38,22 @@ set max [medical eval {select max(weight) from weight}]
 
 set min [medical eval {select min(weight) from weight where weight > 0}]
 
-puts ""
+puts "\nTotal weight lost: [format %1.1f [expr $max - $min]]\n"
 
-puts "Total weight lost: [format %1.1f [expr $max - $min]]"
+set ultimate [medical eval { select weight from weight where weight > 0 order by weight asc limit 1 }]
+
+set penultimate [medical eval { select weight from weight where weight > 0 order by weight asc limit 1 offset 1 }]
+
+# puts "Penultimate: $penultimate, Ultimate: $ultimate, Integer difference: [expr floor($penultimate) - floor($ultimate)]\n"
+
+if { "[expr floor($penultimate) - floor($ultimate) < 1]" } {
+
+  puts "You should Fast.\n"
+
+} else {
+
+  puts "You can Eat.\n"
+
+}
+ 
+
