@@ -40,11 +40,11 @@ set min [medical eval {select min(weight) from weight where weight > 0}]
 
 puts "\nTotal weight lost: [format %1.1f [expr $max - $min]]\n"
 
-set ultimate [medical eval { select weight from weight where weight > 0 order by weight asc limit 1 }]
+set ultimate [medical eval { select weight from weight where weight > 0 order by date desc limit 1 }]
 
-set penultimate [medical eval { select weight from weight where weight > 0 order by weight asc limit 1 offset 1 }]
+set penultimate [medical eval { select weight from weight where weight > 0 order by date desc limit 1 offset 1 }]
 
-# puts "Penultimate: $penultimate, Ultimate: $ultimate, Integer difference: [expr floor($penultimate) - floor($ultimate)]\n"
+puts "Penultimate: $penultimate, Ultimate: $ultimate, Integer difference: [expr floor($penultimate) - floor($ultimate)]\n"
 
 if { "[expr floor($penultimate) - floor($ultimate) < 1]" } {
 
